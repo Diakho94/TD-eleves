@@ -1421,6 +1421,18 @@
         </div>
     </div>
 
+    <!-- Modal Protection Code PIN Entrée (si hébergé en ligne) -->
+    <div id="td-gate-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #1e293b; border: 2px solid #2563eb; border-radius: 14px; padding: 32px 28px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); text-align: center; color: #f8fafc; font-family: Arial, sans-serif;">
+            <div style="font-size: 36px; margin-bottom: 12px;">🔐</div>
+            <h3 style="font-size: 20px; font-weight: 800; margin: 0 0 8px 0; color: #ffffff;">Code d'accès requis</h3>
+            <p style="font-size: 13.5px; color: #94a3b8; margin: 0 0 20px 0; line-height: 1.4;">Ce travail dirigé est protégé. Veuillez saisir le code d'accès officiel :</p>
+            <input type="password" id="gate-pin-input" style="width: 100%; padding: 12px; font-size: 20px; font-weight: 800; letter-spacing: 4px; text-align: center; background: #0f172a; border: 2px solid #334155; border-radius: 8px; color: #ffffff; outline: none; margin-bottom: 10px;" placeholder="••••" maxlength="10" autocomplete="off" autofocus>
+            <div id="gate-error-msg" style="display: none; color: #f87171; font-size: 13px; font-weight: bold; margin-bottom: 12px;">❌ Code incorrect. Vérifiez auprès de votre enseignant.</div>
+            <button type="button" onclick="validerGatePin()" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer;">Déverrouiller le TD</button>
+        </div>
+    </div>
+
     <!-- =========================================================================
          MOTEUR JAVASCRIPT : CONFIGURATION, SSE STREAMING, INDICES & SÉCURITÉ
          ========================================================================= -->
@@ -3040,10 +3052,45 @@
             traiterResultatFinal(dataFinal);
         }
 
+        function verifierGatePinAuLancement() {
+            if (window.location.protocol.startsWith('http') && sessionStorage.getItem('td_eleves_auth') !== 'true') {
+                const modal = document.getElementById('td-gate-modal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    const inp = document.getElementById('gate-pin-input');
+                    if (inp) {
+                        inp.value = '';
+                        setTimeout(() => inp.focus(), 150);
+                        inp.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') validerGatePin();
+                        });
+                    }
+                }
+            }
+        }
+
+        function validerGatePin() {
+            const inp = document.getElementById('gate-pin-input');
+            const err = document.getElementById('gate-error-msg');
+            const code = (inp ? inp.value : '').trim();
+            if (code === "7049") {
+                sessionStorage.setItem('td_eleves_auth', 'true');
+                const modal = document.getElementById('td-gate-modal');
+                if (modal) modal.style.display = 'none';
+            } else {
+                if (err) err.style.display = 'block';
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+            }
+        }
+
         /* =========================================================================
            14. INITIALISATION AU DOMCONTENTLOADED
            ========================================================================= */
         window.addEventListener('DOMContentLoaded', () => {
+            verifierGatePinAuLancement();
             // 1. Initialisation des textes d'en-tête depuis CONFIG_TD
             const titleDoc = document.getElementById('dock-title-label');
             if (titleDoc && CONFIG_TD.titreCourtDock) titleDoc.innerText = CONFIG_TD.titreCourtDock;
