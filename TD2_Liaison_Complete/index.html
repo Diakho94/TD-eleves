@@ -1,0 +1,3114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gabarit Maître TD — Construction Mécanique & Électrotechnique</title>
+
+    <!-- Librairies locales pour archivage PDF haute fidélité et données images Base64 -->
+    <script src="js/html2canvas.min.js"></script>
+    <script src="js/jspdf.umd.min.js"></script>
+    <script src="js/td_images_data.js"></script>
+
+    <style>
+        /* =========================================================================
+           1. CHARTE GRAPHIQUE OFFICIELLE MELEC — TYPOGRAPHIE ARIAL 14 & FORMAT A4
+           Écrin liseuse #525659, Palette Bleu Royal (#1e3a8a / #2563eb / #eef3fc)
+           ========================================================================= */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
+            --primary-bg: #eef3fc;
+            --accent-border: #4472c4;
+            --header-bg: #eef3fc;
+            --font-main: Arial, sans-serif;
+            --font-size-base: 14px;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            font-size: var(--font-size-base);
+            background-color: #525659; /* Fond liseuse PDF */
+            color: #1e293b;
+            line-height: 1.4;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Champs éditables sélectionnables */
+        input, textarea, select {
+            font-family: var(--font-main);
+            font-size: var(--font-size-base);
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+
+        /* =========================================================================
+           2. STRUCTURE EN 2 LIGNES DE PAGES (LIGNE 1 : PAGES 1-3 | LIGNE 2 : PAGES 4+)
+           ========================================================================= */
+        .pages-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            min-width: max-content;
+            margin: 15px auto 40px auto;
+        }
+
+        .pages-row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 26px;
+            width: 100%;
+        }
+
+        /* Format A4 Strict (210mm x 297mm) avec marges internes certifiées 8mm 11mm */
+        .a4-page {
+            width: 210mm;
+            min-width: 210mm;
+            max-width: 210mm;
+            height: 297mm;
+            min-height: 297mm;
+            max-height: 297mm;
+            padding: 8mm 11mm;
+            background: #ffffff;
+            box-shadow: 0 0 16px rgba(0, 0, 0, 0.55);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            border-radius: 2px;
+            flex-shrink: 0;
+            font-family: var(--font-main);
+            font-size: var(--font-size-base);
+        }
+
+        /* En-tête officiel académique */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            font-family: var(--font-main);
+        }
+
+        .header-table td {
+            border: 2px solid var(--primary);
+            padding: 4px 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .header-title {
+            background-color: var(--header-bg);
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.25;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            text-transform: none;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Boîtes et Cartes Pédagogiques */
+        .section-box {
+            border: 2px solid var(--accent-border);
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background: #ffffff;
+            font-family: var(--font-main);
+            font-size: var(--font-size-base);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            border-bottom: 1.5px solid var(--accent-border);
+            padding-bottom: 3px;
+            margin-top: 0;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-partie {
+            background: var(--primary);
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .activity-pill {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 12px;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .mini-card {
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 5px;
+            padding: 7px 10px;
+            font-size: 13px;
+        }
+
+        .mini-card h4 {
+            margin: 0 0 4px 0;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        /* Tableaux Techniques & Formulaires */
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 4px 0;
+            font-family: var(--font-main);
+            font-size: 13px;
+        }
+
+        .tech-table th, .tech-table td {
+            border: 1px solid #cbd5e1;
+            padding: 5px 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .tech-table th {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        .tech-select {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1.5px solid #94a3b8;
+            border-radius: 4px;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: var(--font-main);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .tech-select:focus {
+            border-color: var(--primary-light);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        .tech-select.filled {
+            border-color: var(--primary-light);
+            background-color: #eff6ff;
+            color: #1e3a8a;
+            font-weight: 700;
+        }
+
+        .tech-select.input-correct {
+            border-color: #16a34a !important;
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
+            font-weight: 700 !important;
+        }
+
+        .tech-select.input-wrong {
+            border-color: #dc2626 !important;
+            background-color: #fef2f2 !important;
+            color: #b91c1c !important;
+            font-weight: 700 !important;
+        }
+
+        .tech-select.input-partial {
+            border-color: #d97706 !important;
+            background-color: #fffbeb !important;
+            color: #92400e !important;
+            font-weight: 700 !important;
+        }
+
+        /* Feedback pédagogique de correction (activé après saisie du code enseignant) */
+        .correction-feedback {
+            display: block;
+            margin-top: 5px;
+            font-family: var(--font-main);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .corr-correct {
+            background-color: #f0fdf4;
+            border: 1.5px solid #86efac;
+            color: #15803d;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .corr-partial {
+            background-color: #fefce8;
+            border: 1.5px solid #fde047;
+            color: #854d0e;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        .corr-wrong {
+            background-color: #fef2f2;
+            border: 1.5px solid #fca5a5;
+            color: #991b1b;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        .correction-attendue-box {
+            display: block;
+            background-color: #f0fdf4;
+            border: 1.5px solid #16a34a;
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #15803d;
+            font-weight: 700;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        /* Cartes Questions */
+        .question-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid var(--primary-light);
+            border-radius: 4px;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            font-size: 13.5px;
+        }
+
+        .question-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pts-badge {
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        /* Cadres Plan & Bouclier Anti-Google Lens */
+        .plan-frame {
+            border: 1.5px solid #94a3b8;
+            border-radius: 5px;
+            padding: 4px;
+            background: #ffffff;
+            text-align: center;
+            position: relative;
+            margin-bottom: 6px;
+            overflow: hidden;
+        }
+
+        .plan-frame img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 3px;
+            cursor: crosshair;
+            transition: transform 0.2s ease;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Calque transparent protecteur anti-recherche d'image */
+        .img-shield-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        .zoom-btn-overlay {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            z-index: 10;
+            background: rgba(30, 41, 59, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: background 0.2s;
+        }
+
+        .zoom-btn-overlay:hover {
+            background: var(--primary-light);
+        }
+
+        /* Lentille Loupe Interactive Circulaire */
+        #loupe-lens {
+            position: fixed;
+            width: 180px;
+            height: 180px;
+            border: 3px solid #2563eb;
+            border-radius: 50%;
+            box-shadow: 0 0 16px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.25);
+            display: none;
+            pointer-events: none;
+            z-index: 2500;
+            background-repeat: no-repeat;
+            background-color: #ffffff;
+        }
+
+        /* Badges Éduscol & Bilan */
+        .eval-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .eval-pending { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .eval-vert-fonce { background: #15803d; color: white; border: 1px solid #166534; }
+        .eval-vert-clair { background: #84cc16; color: #0f172a; border: 1px solid #65a30d; }
+        .eval-jaune { background: #eab308; color: #0f172a; border: 1px solid #ca8a04; }
+        .eval-rouge { background: #dc2626; color: white; border: 1px solid #b91c1c; }
+
+        /* Système d'Indices */
+        .hint-btn {
+            background: #fef08a;
+            color: #854d0e;
+            border: 1px solid #facc15;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .hint-btn:hover {
+            background: #fde047;
+        }
+
+        .hint-box {
+            display: none;
+            background: #fefce8;
+            border-left: 3.5px solid #eab308;
+            color: #713f12;
+            padding: 6px 10px;
+            font-size: 12.5px;
+            margin: 5px 0;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.4;
+        }
+
+        /* Pied de page A4 */
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            color: #64748b;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 4px;
+            margin-top: 4px;
+            font-family: var(--font-main);
+        }
+
+        /* =========================================================================
+           3. DOCK SUPÉRIEUR DE NAVIGATION & CONTRÔLE
+           ========================================================================= */
+        .dock-bar {
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            background: #1e293b;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            max-width: min(98vw, 1500px);
+            margin: 0 auto 16px auto;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+            font-family: var(--font-main);
+        }
+
+        .dock-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .dock-btn {
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 11px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .dock-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .dock-btn.active-mode {
+            background: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+        }
+
+        .dock-tab {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+            padding: 5px 9px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dock-tab:hover, .dock-tab.active {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+
+        .dock-indices-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.75);
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1.5px solid #3b82f6;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .dock-status-badge {
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .status-unvalidated {
+            background: #b45309;
+            color: #fef3c7;
+        }
+
+        .status-validated {
+            background: #15803d;
+            color: #dcfce7;
+        }
+
+        /* Modes d'affichage */
+        body.mode-vertical .pages-row {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        body.mode-single .a4-page {
+            display: none;
+        }
+
+        body.mode-single .a4-page.single-active {
+            display: flex;
+        }
+
+        /* =========================================================================
+           4. MODALE SYNCHRONISATION SSE STREAMING & MODALE ZOOM HD
+           ========================================================================= */
+        .zoom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.93);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            backdrop-filter: blur(4px);
+        }
+
+        .zoom-modal.active {
+            display: flex;
+        }
+
+        .zoom-modal-header {
+            padding: 10px 20px;
+            background: #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .zoom-modal-toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .zoom-modal-toolbar button {
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .zoom-modal-toolbar button:hover {
+            background: var(--primary-light);
+        }
+
+        .zoom-modal-body {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: grab;
+        }
+
+        .zoom-modal-body.grabbing {
+            cursor: grabbing;
+        }
+
+        .zoom-modal-body img {
+            max-width: 94%;
+            max-height: 94%;
+            object-fit: contain;
+            transition: transform 0.08s ease-out;
+            transform-origin: center center;
+            user-select: none;
+        }
+
+        /* Modale Bloquante SSE */
+        #sync-sse-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 4000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sse-modal-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px 28px;
+            width: min(92vw, 480px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            font-family: var(--font-main);
+        }
+
+        .sse-progress-container {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 16px 0 10px 0;
+        }
+
+        .sse-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563eb, #16a34a);
+            transition: width 0.4s ease;
+        }
+
+        .sse-step-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: #64748b;
+            margin-top: 14px;
+            text-align: center;
+        }
+
+        .sse-step-item.active {
+            color: #2563eb;
+            font-weight: 700;
+        }
+
+        .sse-step-item.done {
+            color: #16a34a;
+            font-weight: 700;
+        }
+
+        /* =========================================================================
+           5. IMPRESSION STRICTE A4 (210mm x 297mm) EN ARIAL 14
+           ========================================================================= */
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+            html, body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: Arial, sans-serif !important;
+                font-size: 14px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                width: 210mm !important;
+            }
+
+            .dock-bar, .zoom-modal, .zoom-btn-overlay, #loupe-lens, #sync-sse-modal, .hint-btn {
+                display: none !important;
+            }
+
+            .pages-container, .pages-row {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 210mm !important;
+                gap: 0 !important;
+            }
+
+            .a4-page {
+                display: flex !important;
+                font-family: Arial, sans-serif !important;
+                font-size: 14px !important;
+                page-break-before: always !important;
+                page-break-after: always !important;
+                break-before: page !important;
+                break-after: page !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 8mm 11mm !important;
+                width: 210mm !important;
+                min-width: 210mm !important;
+                max-width: 210mm !important;
+                height: 297mm !important;
+                min-height: 297mm !important;
+                max-height: 297mm !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+            }
+
+            .a4-page:first-child {
+                page-break-before: avoid !important;
+                break-before: avoid !important;
+            }
+
+            .a4-page * {
+                font-family: Arial, sans-serif !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Lentille de grossissement interactive (Loupe HD) -->
+    <div id="loupe-lens"></div>
+
+    <!-- Modale bloquante de synchronisation SSE -->
+    <div id="sync-sse-modal">
+        <div class="sse-modal-card">
+            <h3 style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 17px;">Certification & Évaluation en cours...</h3>
+            <p id="sse-live-message" style="margin: 0; font-size: 13.5px; color: #334155;">Initialisation de la transmission sécurisée...</p>
+            <div class="sse-progress-container">
+                <div id="sse-live-progress-bar" class="sse-progress-bar"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: #475569;">
+                <span id="sse-progress-pct">0%</span>
+                <span>Relais FastAPI Sécurisé</span>
+            </div>
+            <div class="sse-step-row">
+                <div id="sse-step-1" class="sse-step-item">1. IA Mistral (RGPD)</div>
+                <div id="sse-step-2" class="sse-step-item">2. Dépôt Nuage</div>
+                <div id="sse-step-3" class="sse-step-item">3. Inscription Grist</div>
+            </div>
+            <!-- Bouton de secours disponible pendant le processus d'envoi -->
+            <div id="sse-secours-box" style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%;">
+                <button type="button" id="btn-sse-secours" onclick="telechargerPDFSecoursLocal()" style="background: #b45309; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 7px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: all 0.2s;">
+                    📥 Télécharger le PDF de secours maintenant
+                </button>
+                <span style="font-size: 11px; color: #64748b;">(Enregistre une copie PDF locale sans interrompre l'envoi vers le cloud)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         DOCK DE NAVIGATION & CONTRÔLE SUPÉRIEUR MODERNE
+         ========================================================================= -->
+    <div class="dock-bar">
+        <div class="dock-left">
+            <span id="dock-title-label" style="font-weight: 800; color: #93c5fd; font-size: 13px; letter-spacing: 0.5px;">TD MODÈLE</span>
+            <div id="dock-tabs-container" style="display: flex; gap: 4px; margin-left: 6px;">
+                <button class="dock-tab active" onclick="naviguerVersPage('page-1-garde')">P.1 Garde</button>
+                <button class="dock-tab" onclick="naviguerVersPage('page-2-contexte')">P.2 Contexte</button>
+                <button class="dock-tab" onclick="naviguerVersPage('page-3-bilan')">P.3 Bilan</button>
+                <button class="dock-tab" onclick="naviguerVersPage('page-4-exercices-1')">P.4 Exercices 1</button>
+                <button class="dock-tab" onclick="naviguerVersPage('page-5-exercices-2')">P.5 Exercices 2</button>
+            </div>
+            <div style="display: flex; gap: 4px; margin-left: 8px;">
+                <button id="btn-mode-lignes" class="dock-btn active-mode" onclick="basculerModeAffichage('lignes')" title="Affichage Grille">Grille</button>
+                <button id="btn-mode-vertical" class="dock-btn" onclick="basculerModeAffichage('vertical')" title="Défilement vertical continu">Vertical</button>
+                <button id="btn-mode-single" class="dock-btn" onclick="basculerModeAffichage('single')" title="Afficher une seule page à la fois">Page unique</button>
+                <button id="btn-dock-loupe" class="dock-btn" onclick="basculerLoupe()" style="background: #0284c7;" title="Activer / désactiver la loupe de précision">🔎 Activer Loupe</button>
+            </div>
+        </div>
+
+        <div class="dock-right" style="display: flex; align-items: center; gap: 10px;">
+            <!-- Badge dynamique d'indices (3 gratuits + compteur d'utilisation) -->
+            <div id="dock-indices-box" style="display: flex; align-items: center; gap: 6px; background: rgba(15, 23, 42, 0.75); padding: 5px 12px; border-radius: 6px; border: 1.5px solid #3b82f6; font-size: 13px; font-weight: 700;">
+                <span style="color: #fbbf24;">💡 Indices :</span>
+                <span id="dock-indices-count" style="color: #60a5fa;">0 utilisé (3 gratuits)</span>
+            </div>
+
+            <span id="dock-status-badge" class="dock-status-badge status-unvalidated">Non validé</span>
+
+            <button id="btn-dock-synthese" class="dock-btn" onclick="ouvrirFicheSynthese()" style="background: #0284c7;">
+                📄 Fiche Synthèse
+            </button>
+            <button id="btn-dock-pdf" class="dock-btn" onclick="exporterDossierPDF()" disabled style="background: #16a34a; opacity: 0.5; cursor: not-allowed;">
+                📥 Enregistrer PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         CONTENEUR PRINCIPAL DES PAGES (2 LIGNES)
+         ========================================================================= -->
+    <div class="pages-container">
+
+        <!-- =====================================================================
+             LIGNE 1 FIXE : PAGES 1, 2 ET 3 (Garde, Contexte & Référentiel, Bilan)
+             ===================================================================== -->
+        <div class="pages-row">
+
+            <!-- -----------------------------------------------------------------
+                 PAGE 1 : PAGE DE GARDE & FICHE CONTRAT D'IDENTIFICATION
+                 ----------------------------------------------------------------- -->
+            <div class="a4-page" id="page-1-garde">
+                <div>
+                    <!-- En-tête académique officiel -->
+                    <table class="header-table">
+                        <tr>
+                            <td style="width: 25%; font-weight: 800; font-size: 12px; background: #f8fafc; color: var(--primary); line-height: 1.35;">
+                                Lycée Professionnel<br>
+                                <span style="font-size: 11px; color: #475569; font-weight: 600;">Académie de Versailles</span><br>
+                                <span id="header-filiere-label" style="font-size: 11.5px; color: #0284c7; font-weight: 700;">Bac Pro MELEC</span>
+                            </td>
+                            <td style="width: 50%;" class="header-title">
+                                <span id="header-titre-officiel">TD : SOLUTIONS CONSTRUCTIVES D'ASSEMBLAGE</span>
+                                <span class="header-sub">Dossier d'activité d'apprentissage & d'évaluation</span>
+                            </td>
+                            <td style="width: 25%; font-size: 11.5px; background: #f8fafc; line-height: 1.35;">
+                                <strong>M. DIAKHO</strong><br>
+                                <span style="font-size: 11px; color: #475569;">Construction Mécanique</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- 1. Fiche Contrat & Identification -->
+                    <div class="section-box" style="padding: 10px 14px; margin-bottom: 10px;">
+                        <div class="section-title" style="margin-bottom: 8px; justify-content: space-between;">
+                            <span>Fiche Contrat & Identification</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label style="font-size: 12.5px; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" id="check-binome" onchange="toggleBinomeMode()" style="width: 16px; height: 16px;">
+                                    Travailler en binôme (2 élèves)
+                                </label>
+                                <span id="badge-mode-travail" style="background: #e2e8f0; color: #475569; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px;">Mode individuel</span>
+                                <span id="badge-indices-p1" style="background: #fef3c7; color: #92400e; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px; border: 1px solid #fcd34d;">💡 Indices : <span id="indices-count-p1">0 utilisé (3 gratuits)</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Grille Champs Identité avec les 8 classes officielles -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;">
+                            <div>
+                                <label style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 3px; font-size: 13px;">Nom de l'élève 1 * :</label>
+                                <input type="text" id="student-nom" class="tech-select" placeholder="NOM (ex. DUPONT)" oninput="mettreAJourIdentite()" style="text-transform: uppercase;">
+                            </div>
+                            <div>
+                                <label style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 3px; font-size: 13px;">Prénom de l'élève 1 * :</label>
+                                <input type="text" id="student-prenom" class="tech-select" placeholder="Prénom (ex. Thomas)" oninput="mettreAJourIdentite()">
+                            </div>
+                            <div>
+                                <label style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 3px; font-size: 13px;">Classe * :</label>
+                                <select id="student-classe" class="tech-select" onchange="mettreAJourIdentite()">
+                                    <option value="">-- Choisir la classe --</option>
+                                    <option value="TMELEC1">TMELEC1</option>
+                                    <option value="TMELEC2">TMELEC2</option>
+                                    <option value="TMFER">TMFER</option>
+                                    <option value="1MELEC1" selected>1MELEC1</option>
+                                    <option value="1MELEC2">1MELEC2</option>
+                                    <option value="1MFER">1MFER</option>
+                                    <option value="1MELFER MELEC">1MELFER MELEC</option>
+                                    <option value="1MELFER MFER">1MELFER MFER</option>
+                                </select>
+                            </div>
+                            <div id="container-student-groupe">
+                                <label id="label-student-groupe" style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 3px; font-size: 13px;">Groupe * :</label>
+                                <select id="student-groupe" class="tech-select" onchange="mettreAJourIdentite()">
+                                    <option value="">-- Choisir le groupe --</option>
+                                    <option value="Groupe 1" selected>Groupe 1</option>
+                                    <option value="Groupe 2">Groupe 2</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Ligne Élève 2 (Masquée par défaut) -->
+                        <div id="box-eleve-2" style="display: none; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-top: 8px; border-top: 1px dashed #bfdbfe; padding-top: 8px;">
+                            <div>
+                                <label style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 3px; font-size: 13px;">Nom de l'élève 2 * :</label>
+                                <input type="text" id="student-nom2" class="tech-select" placeholder="NOM ÉLÈVE 2" oninput="mettreAJourIdentite()" style="text-transform: uppercase;">
+                            </div>
+                            <div>
+                                <label style="font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 3px; font-size: 13px;">Prénom de l'élève 2 * :</label>
+                                <input type="text" id="student-prenom2" class="tech-select" placeholder="Prénom Élève 2" oninput="mettreAJourIdentite()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Objectif de la séance -->
+                    <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; padding: 9px 14px; margin-bottom: 10px;">
+                        <strong style="color: #1e3a8a; font-size: 13.5px; display: block; margin-bottom: 3px;">🎯 Objectif de la séance</strong>
+                        <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.45;">
+                            Être capable d'analyser et d'interpréter les solutions constructives d'un sous-ensemble mécanique en identifiant les composants de liaison, d'étanchéité et de guidage, afin de préparer une intervention professionnelle dans le respect des règles de l'art.
+                        </p>
+                    </div>
+
+                    <!-- 3. Planche Image de Garde avec bouclier anti-Google Lens -->
+                    <div class="plan-frame" style="padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px;">
+                        <div class="img-shield-overlay"></div>
+                        <img src="img/liaison_complete_elements_garde.png" alt="Éléments mécaniques d'assemblage et de fixation" ondragstart="return false;" style="max-height: 420px; width: 100%; object-fit: contain; border-radius: 4px;" onclick="ouvrirZoomPlan('img/liaison_complete_elements_garde.png', 'Page de Garde : Solutions constructives d\'assemblage')">
+                        <button class="zoom-btn-overlay" onclick="ouvrirZoomPlan('img/liaison_complete_elements_garde.png', 'Page de Garde : Solutions constructives d\'assemblage')">🔍 Agrandir l'image</button>
+                    </div>
+                </div>
+
+                <!-- Footer A4 -->
+                <table class="footer-table">
+                    <tr>
+                        <td style="width: 50%;">Lycée Professionnel — Enseignement Technique</td>
+                        <td style="width: 50%; text-align: right;">Page 1 / 5 — Page de Garde & Contrat</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 PAGE 2 : CADRE PÉDAGOGIQUE & CONTEXTE PROFESSIONNEL
+                 ----------------------------------------------------------------- -->
+            <div class="a4-page" id="page-2-contexte">
+                <div>
+                    <!-- En-tête officiel -->
+                    <table class="header-table">
+                        <tr>
+                            <td style="width: 25%; font-weight: 800; font-size: 12px; background: #f8fafc; color: var(--primary); line-height: 1.35;">
+                                Lycée Professionnel<br>
+                                <span style="font-size: 11px; color: #475569; font-weight: 600;">Académie de Versailles</span><br>
+                                <span style="font-size: 11.5px; color: #0284c7; font-weight: 700;">Bac Pro MELEC</span>
+                            </td>
+                            <td style="width: 50%;" class="header-title">
+                                <span id="header-titre-officiel-p2">TD : SOLUTIONS CONSTRUCTIVES D'ASSEMBLAGE</span>
+                                <span class="header-sub">Contexte professionnel & Conditions de réalisation</span>
+                            </td>
+                            <td style="width: 25%; font-size: 11.5px; background: #f8fafc; line-height: 1.35;">
+                                <strong>M. DIAKHO</strong><br>
+                                <span style="font-size: 11px; color: #475569;">Construction Mécanique</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- 1. Activité & Tâches Professionnelles -->
+                    <div class="section-box" style="padding: 10px 14px; margin-bottom: 10px;">
+                        <div class="section-title">
+                            <span>1. Activité & Tâches Professionnelles — Bac Pro MELEC</span>
+                        </div>
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                            <span class="activity-pill">ACTIVITÉ 1</span>
+                            <strong style="font-size: 13.5px; color: #1e293b;">Préparation des opérations de réalisation, de mise en service et de maintenance</strong>
+                        </div>
+
+                        <div style="font-size: 13px; color: #334155; line-height: 1.45; margin-bottom: 6px; background: #f8fafc; padding: 8px 12px; border-radius: 5px; border: 1px solid #e2e8f0;">
+                            <strong>Tâches professionnelles :</strong><br>
+                            • <strong>T1-2 :</strong> Rechercher et expliquer les informations relatives aux opérations et aux conditions d'exécution.
+                        </div>
+
+                        <div style="font-size: 13px; color: #334155; line-height: 1.45; background: #f8fafc; padding: 8px 12px; border-radius: 5px; border: 1px solid #e2e8f0;">
+                            <strong>Compétences du Référentiel mobilisées :</strong><br>
+                            • <strong>C1 :</strong> Analyser les conditions de l'opération et son contexte.<br>
+                            • <strong>C2 :</strong> Organiser le poste de travail (porte-documents, stylo, calculatrice).
+                        </div>
+                    </div>
+
+                    <!-- 2. Mise en situation & Problématique Professionnelle -->
+                    <div class="section-box" style="padding: 10px 14px; margin-bottom: 10px;">
+                        <div class="section-title">
+                            <span>2. Mise en situation & Problématique Professionnelle</span>
+                        </div>
+
+                        <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 8px 12px; border-radius: 0 5px 5px 0; margin-bottom: 8px; font-size: 13px; line-height: 1.45; color: #14532d;">
+                            <strong>Mise en situation :</strong> Dans le cadre de ses missions en milieu industriel ou tertiaire, le technicien intervient sur des armoires d'automatisme, des moteurs, des convoyeurs et des platines de commande. Ces ensembles comportent des liaisons mécaniques complètes ou partielles assurant le maintien des composants, la rigidité structurelle et la sécurité des installations.
+                        </div>
+
+                        <div style="background: #fefce8; border-left: 4px solid #eab308; padding: 8px 12px; border-radius: 0 5px 5px 0; font-size: 13px; line-height: 1.45; color: #713f12;">
+                            <strong>Problématique professionnelle :</strong> Lors d'une intervention de diagnostic ou de montage, comment décoder avec précision les dessins d'ensemble et les nomenclatures pour sélectionner les éléments de fixation adéquats et l'outillage normalisé correspondant ?
+                        </div>
+                    </div>
+
+                    <!-- 3. Conditions de réalisation (3 colonnes) -->
+                    <div class="section-box" style="padding: 10px 14px; margin-bottom: 0;">
+                        <div class="section-title">
+                            <span>3. Conditions de réalisation</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                            <div class="mini-card" style="border-top: 3px solid #2563eb;">
+                                <h4 style="color: #1e3a8a;">On donne :</h4>
+                                <ul style="margin: 0; padding-left: 14px; font-size: 12.5px; color: #334155; line-height: 1.4;">
+                                    <li style="margin-bottom: 3px;">Le dossier technique et les plans numériques.</li>
+                                    <li>La fiche de synthèse ressource.</li>
+                                </ul>
+                            </div>
+
+                            <div class="mini-card" style="border-top: 3px solid #0284c7;">
+                                <h4 style="color: #0284c7;">On demande :</h4>
+                                <ul style="margin: 0; padding-left: 14px; font-size: 12.5px; color: #334155; line-height: 1.4;">
+                                    <li style="margin-bottom: 3px;">Identifier les pièces d'arrêt et de liaison.</li>
+                                    <li>Relever les dimensions normalisées.</li>
+                                </ul>
+                            </div>
+
+                            <div class="mini-card" style="border-top: 3px solid #16a34a;">
+                                <h4 style="color: #16a34a;">On exige :</h4>
+                                <ul style="margin: 0; padding-left: 14px; font-size: 12.5px; color: #334155; line-height: 1.4;">
+                                    <li style="margin-bottom: 3px;">Rigueur et précision du vocabulaire technique.</li>
+                                    <li>Respect strict des tolérances et normes.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer A4 -->
+                <table class="footer-table">
+                    <tr>
+                        <td style="width: 50%;">Lycée Professionnel — Enseignement Technique</td>
+                        <td style="width: 50%; text-align: right;">Page 2 / 5 — Contexte & Référentiel</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 PAGE 3 : BILAN OFFICIEL PAR COMPÉTENCES & VALIDATION PROFESSEUR
+                 ----------------------------------------------------------------- -->
+            <div class="a4-page" id="page-3-bilan">
+                <div>
+                    <!-- En-tête officiel -->
+                    <table class="header-table">
+                        <tr>
+                            <td style="width: 25%; font-weight: 800; font-size: 12px; background: #f8fafc; color: var(--primary); line-height: 1.35;">
+                                Lycée Professionnel<br>
+                                <span style="font-size: 11px; color: #475569; font-weight: 600;">Académie de Versailles</span><br>
+                                <span style="font-size: 11.5px; color: #0284c7; font-weight: 700;">Bac Pro MELEC</span>
+                            </td>
+                            <td style="width: 50%;" class="header-title">
+                                <span id="header-titre-officiel-p3">TD : SOLUTIONS CONSTRUCTIVES D'ASSEMBLAGE</span>
+                                <span class="header-sub">Bilan officiel & Synthèse de validation</span>
+                            </td>
+                            <td style="width: 25%; font-size: 11.5px; background: #f8fafc; line-height: 1.35;">
+                                <strong>M. DIAKHO</strong><br>
+                                <span style="font-size: 11px; color: #475569;">Construction Mécanique</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Bandeau d'Identification Élève(s) -->
+                    <div id="bilan-eleve-bandeau" style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 5px; padding: 6px 12px; margin-bottom: 8px; font-size: 13px;">
+                        <div><strong>Élève(s) :</strong> <span id="bilan-nom-eleve" style="color: #1e3a8a; font-weight: 700;">--</span></div>
+                        <div><strong>Classe :</strong> <span id="bilan-classe-eleve" style="color: #1e3a8a; font-weight: 700;">1MELEC1</span><span id="bilan-groupe-wrapper"> | <strong>Groupe :</strong> <span id="bilan-groupe-eleve" style="color: #1e3a8a; font-weight: 700;">Groupe 1</span></span></div>
+                    </div>
+
+                    <!-- 1. Encadré NOTE FINALE OFFICIELLE -->
+                    <div class="section-box" style="text-align: center; padding: 10px 16px; background: linear-gradient(135deg, #f8fafc, #eff6ff); border: 2px solid var(--primary-light); margin-bottom: 8px; border-radius: 6px;">
+                        <div style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.8px; color: #1e3a8a; text-transform: uppercase;">
+                            NOTE FINALE OFFICIELLE
+                        </div>
+                        <div id="global-score-converted" style="font-size: 34px; font-weight: 900; color: #1e3a8a; margin: 2px 0;">
+                            --.- / 20
+                        </div>
+                        <div id="prof-eval-status-text" style="font-size: 12.5px; font-weight: 600; color: #64748b;">
+                            Dossier en attente de validation par l'enseignant
+                        </div>
+                        <div id="score-details-row" style="margin-top: 6px; font-size: 13px; color: #1e3a8a; border-top: 1px dashed #cbd5e1; padding-top: 5px;">
+                            Score brut questions : <strong id="global-score-raw">0.0 / 20.0 pts</strong> | 💡 Indices : <strong id="indices-count-display">0 utilisé (3 gratuits, 0.00 pt déduit)</strong>
+                        </div>
+                    </div>
+
+                    <!-- 2. Bilan Officiel par Compétences (Généré dynamiquement depuis CONFIG_TD.competences) -->
+                    <div class="section-box" style="padding: 8px 12px; margin-bottom: 8px;">
+                        <div class="section-title" style="margin-bottom: 5px;">
+                            <span>Bilan Officiel par Compétences</span>
+                        </div>
+                        <table class="tech-table" id="table-bilan-competences">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%; text-align: center;">Réf</th>
+                                    <th style="width: 54%;">Intitulé de la compétence</th>
+                                    <th style="width: 24%; text-align: center;">Niveau d'acquisition</th>
+                                    <th style="width: 12%; text-align: center;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rempli dynamiquement au DOMContentLoaded -->
+                            </tbody>
+                        </table>
+
+                        <!-- Paliers Éduscol -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 6px; font-size: 11px; text-align: center;">
+                            <div style="background: #15803d; color: white; padding: 4px 2px; border-radius: 4px; font-weight: bold;">
+                                Très bonne maîtrise<br>17 ≤ Note ≤ 20
+                            </div>
+                            <div style="background: #84cc16; color: #0f172a; padding: 4px 2px; border-radius: 4px; font-weight: bold;">
+                                Maîtrise satisfaisante<br>11 &lt; Note &lt; 17
+                            </div>
+                            <div style="background: #eab308; color: #0f172a; padding: 4px 2px; border-radius: 4px; font-weight: bold;">
+                                Maîtrise fragile<br>4 &lt; Note ≤ 11
+                            </div>
+                            <div style="background: #dc2626; color: white; padding: 4px 2px; border-radius: 4px; font-weight: bold;">
+                                Maîtrise insuffisante<br>Note ≤ 4 / 20
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Encadré Compétence C2 — Organiser le poste de travail -->
+                    <div class="section-box" style="padding: 8px 12px; margin-bottom: 8px; background: #fafafa;">
+                        <div class="section-title" style="margin-bottom: 5px; justify-content: space-between;">
+                            <span>Compétence C2 — Organiser le poste de travail (Porte-documents & Stylo)</span>
+                            <span id="c2-status-badge" class="eval-badge eval-rouge">MAÎTRISE INSUFFISANTE</span>
+                        </div>
+                        <div style="display: flex; gap: 24px; font-size: 13px; align-items: center;">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="check-c2-classeur" onchange="mettreAJourC2()" style="width: 16px; height: 16px;">
+                                <strong>Porte-documents complet présent</strong>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="check-c2-stylo" onchange="mettreAJourC2()" style="width: 16px; height: 16px;">
+                                <strong>Stylo, règle & calculatrice présents</strong>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 4. Espace Réservé à l'Enseignant (Validation & Déverrouillage) -->
+                    <div id="section-prof-auth" class="section-box section-prof-box" style="background: #fffbeb; border: 1.5px solid #fde68a; padding: 8px 12px; margin-bottom: 8px;">
+                        <div class="section-title" style="color: #b45309; border-bottom: none; margin-bottom: 3px;">
+                            <span>🔒 Espace Réservé à l'Enseignant (Validation & Déverrouillage)</span>
+                        </div>
+                        <p style="margin: 0 0 6px 0; font-size: 12.5px; color: #78350f; line-height: 1.4;">
+                            Lorsque le questionnaire est complété, appelez l'enseignant pour contrôle et saisie du code secret.
+                        </p>
+                        <div id="prof-auth-box" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <input type="password" id="prof-code" placeholder="Code secret" style="padding: 6px 12px; border-radius: 5px; border: 1.5px solid #cbd5e1; font-size: 14px; text-align: center; letter-spacing: 2px; width: 170px;" onkeydown="if(event.key==='Enter') validerTD()">
+                            <button type="button" id="btn-valider-td" onclick="validerTD()" style="background: #2563eb; color: white; border: none; padding: 7px 15px; border-radius: 5px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
+                                Valider le TD & Afficher la Note
+                            </button>
+                            <button type="button" id="btn-secours-prof-box" onclick="telechargerPDFSecoursLocal()" style="display: none; background: #b45309; color: white; border: none; padding: 7px 13px; border-radius: 5px; font-weight: 700; font-size: 12px; cursor: pointer;" title="Téléchargement direct en cas de coupure Internet">
+                                🆘 Mode Secours : Télécharger PDF local
+                            </button>
+                            <span id="prof-error-msg" style="color: #dc2626; font-size: 12px; font-weight: bold; width: 100%; display: none;"></span>
+                        </div>
+                        <div id="prof-validated-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; padding: 8px 12px; border-radius: 5px; margin-top: 6px;">
+                            <div style="font-size: 13px; font-weight: bold; color: #065f46;">
+                                ✅ Dossier certifié et enregistré avec succès !
+                            </div>
+                            <div style="font-size: 12px; color: #047857; margin-top: 2px;">
+                                Fichier copie archivé : <span id="saved-filename-display" style="font-weight: bold; font-family: monospace;"></span>
+                            </div>
+                            <div style="margin-top: 6px;">
+                                <button type="button" onclick="exporterDossierPDF()" style="background: #16a34a; color: white; border: none; padding: 5px 12px; border-radius: 4px; font-weight: 700; font-size: 12px; cursor: pointer;">
+                                    📥 Télécharger une copie du PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer A4 -->
+                <table class="footer-table">
+                    <tr>
+                        <td style="width: 50%;">Lycée Professionnel — Enseignement Technique</td>
+                        <td style="width: 50%; text-align: right;">Page 3 / 5 — Bilan & Synthèse des Notes</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- FIN LIGNE 1 FIXE -->
+
+        <!-- =====================================================================
+             <!-- === DEBUT ZONE EXERCICES MODULAIRES === -->
+             LIGNE 2 MODULAIRE : PAGES D'EXERCICES ADAPTABLES (PAGES 4, 5, 6...)
+             ===================================================================== -->
+        <div class="pages-row">
+
+            <!-- -----------------------------------------------------------------
+                 PAGE 4 : EXERCICE TYPE 1 (QCM SÉLECTEURS, NUMÉRIQUE & INDICE)
+                 ----------------------------------------------------------------- -->
+            <div class="a4-page" id="page-4-exercices-1">
+                <div>
+                    <!-- En-tête officiel -->
+                    <table class="header-table">
+                        <tr>
+                            <td style="width: 25%; font-weight: 800; font-size: 12px; background: #f8fafc; color: var(--primary); line-height: 1.35;">
+                                Lycée Professionnel<br>
+                                <span style="font-size: 11px; color: #475569; font-weight: 600;">Académie de Versailles</span><br>
+                                <span style="font-size: 11.5px; color: #0284c7; font-weight: 700;">Bac Pro MELEC</span>
+                            </td>
+                            <td style="width: 50%;" class="header-title">
+                                <span>TD : SOLUTIONS CONSTRUCTIVES D'ASSEMBLAGE</span>
+                                <span class="header-sub">1ère Partie : Analyse fonctionnelle & Identification</span>
+                            </td>
+                            <td style="width: 25%; font-size: 11.5px; background: #f8fafc; line-height: 1.35;">
+                                <strong>M. DIAKHO</strong><br>
+                                <span style="font-size: 11px; color: #475569;">Construction Mécanique</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="section-box" style="margin-bottom: 6px; padding: 5px 10px;">
+                        <div class="section-title" style="margin-bottom: 2px;">
+                            <span class="badge-partie">EXERCICE 1</span> IDENTIFICATION DES COMPOSANTS DU SYSTÈME
+                            <span class="pts-badge" style="margin-left: auto;">10 POINTS (C1)</span>
+                        </div>
+                        <p style="margin: 2px 0 0 0; font-size: 13.5px; color: #1e293b;">
+                            <strong>Consigne générale :</strong> À partir de la modélisation technique ci-dessous, renseignez les sélecteurs et champs demandés. Vous disposez de 3 indices gratuits pour tout le TD. Au-delà, chaque indice supplémentaire déduit 0,25 pt.
+                        </p>
+                    </div>
+
+                    <!-- Planche Technique avec Zoom et Bouclier Protecteur -->
+                    <div class="plan-frame" style="height: 480px; margin-bottom: 8px;">
+                        <div class="img-shield-overlay"></div>
+                        <img id="img-plan-p4" src="img/td2_page_1.png" alt="Planche technique d'identification" ondragstart="return false;" style="max-height: 470px;" onclick="ouvrirZoomPlan('img/td2_page_1.png', 'Planche 1 : Repérage des sous-ensembles fonctionnels')">
+                        <button class="zoom-btn-overlay" onclick="ouvrirZoomPlan('img/td2_page_1.png', 'Planche 1 : Repérage des sous-ensembles fonctionnels')">🔍 Zoom HD Plan</button>
+                    </div>
+
+                    <!-- Grille Questions Type 1 : Menus déroulants QCM (select.tech-select[data-qid]) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; font-size: 13px;">
+                        <div class="question-card">
+                            <div class="question-title">
+                                <span><strong>Q1.A :</strong> Identification du composant repère A</span>
+                                <span class="pts-badge">1.0 PT</span>
+                            </div>
+                            <select id="q1_rep_a" data-qid="q1_rep_a" class="tech-select" onchange="onUserAnswerChange(this)">
+                                <option value="">-- Sélectionner le composant --</option>
+                                <option value="Moteur">Moteur</option>
+                                <option value="Réducteur">Réducteur</option>
+                                <option value="Convoyeur à rouleaux">Convoyeur à rouleaux</option>
+                                <option value="Système poulies/courroie">Système poulies/courroie</option>
+                                <option value="Paliers">Paliers</option>
+                            </select>
+                        </div>
+
+                        <div class="question-card">
+                            <div class="question-title">
+                                <span><strong>Q1.B :</strong> Identification du composant repère B</span>
+                                <span class="pts-badge">1.0 PT</span>
+                            </div>
+                            <select id="q1_rep_b" data-qid="q1_rep_b" class="tech-select" onchange="onUserAnswerChange(this)">
+                                <option value="">-- Sélectionner le composant --</option>
+                                <option value="Convoyeur à rouleaux">Convoyeur à rouleaux</option>
+                                <option value="Moteur">Moteur</option>
+                                <option value="Réducteur">Réducteur</option>
+                                <option value="Système poulies/courroie">Système poulies/courroie</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Exemple Indice interactif (3 gratuits + pénalité + anti-copiage) -->
+                    <div style="margin-top: 4px; display: flex; align-items: center; justify-content: space-between;">
+                        <button type="button" id="btn-hint-1" class="hint-btn" onclick="toggleHint('hint-q1', this)">
+                            💡 Afficher l'indice (3 gratuits, puis -0,25 pt)
+                        </button>
+                        <span style="font-size: 11.5px; color: #64748b; font-style: italic;">Cliquez sur l'indice pour le masquer/réafficher aux voisins</span>
+                    </div>
+                    <div id="hint-q1" class="hint-box">
+                        💡 <strong>Indice Q1 :</strong> Le composant A convertit l'énergie électrique en énergie mécanique de rotation. Le composant B supporte et déplace les colis le long de la ligne.
+                    </div>
+                </div>
+
+                <!-- Footer A4 -->
+                <table class="footer-table">
+                    <tr>
+                        <td style="width: 50%;">Bac Pro MELEC — TD Construction Mécanique</td>
+                        <td style="width: 50%; text-align: right;">Page 4 / 5 — Exercice 1 : Identification</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 PAGE 5 : EXERCICE TYPE 2 (DOSSIER TECHNIQUE, SAISIE & RÉDACTION)
+                 ----------------------------------------------------------------- -->
+            <div class="a4-page" id="page-5-exercices-2">
+                <div>
+                    <!-- En-tête officiel -->
+                    <table class="header-table">
+                        <tr>
+                            <td style="width: 25%; font-weight: 800; font-size: 12px; background: #f8fafc; color: var(--primary); line-height: 1.35;">
+                                Lycée Professionnel<br>
+                                <span style="font-size: 11px; color: #475569; font-weight: 600;">Académie de Versailles</span><br>
+                                <span style="font-size: 11.5px; color: #0284c7; font-weight: 700;">Bac Pro MELEC</span>
+                            </td>
+                            <td style="width: 50%;" class="header-title">
+                                <span>TD : SOLUTIONS CONSTRUCTIVES D'ASSEMBLAGE</span>
+                                <span class="header-sub">2ème Partie : Étude technologique & Cotation</span>
+                            </td>
+                            <td style="width: 25%; font-size: 11.5px; background: #f8fafc; line-height: 1.35;">
+                                <strong>M. DIAKHO</strong><br>
+                                <span style="font-size: 11px; color: #475569;">Construction Mécanique</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="section-box" style="margin-bottom: 6px; padding: 5px 10px;">
+                        <div class="section-title" style="margin-bottom: 2px;">
+                            <span class="badge-partie">EXERCICE 2</span> ÉTUDE DE LA LIAISON ET RELEVÉ DE COTES
+                            <span class="pts-badge" style="margin-left: auto;">10 POINTS (C1)</span>
+                        </div>
+                        <p style="margin: 2px 0 0 0; font-size: 13.5px; color: #1e293b;">
+                            <strong>Consigne :</strong> À l'aide de la vue en coupe et de la nomenclature, déterminez les valeurs numériques et rédigez l'explication demandée.
+                        </p>
+                    </div>
+
+                    <!-- Planche Dossier Technique avec Zoom et Bouclier -->
+                    <div class="plan-frame" style="height: 390px; margin-bottom: 8px;">
+                        <div class="img-shield-overlay"></div>
+                        <img id="img-plan-p5" src="img/td2_page_2.png" alt="Dossier technique de coupe" ondragstart="return false;" style="max-height: 380px;" onclick="ouvrirZoomPlan('img/td2_page_2.png', 'Dossier Technique : Coupe & Nomenclature')">
+                        <button class="zoom-btn-overlay" onclick="ouvrirZoomPlan('img/td2_page_2.png', 'Dossier Technique : Coupe & Nomenclature')">🔍 Zoom HD Plan</button>
+                    </div>
+
+                    <!-- Question Type 2 : Saisie numérique (input.tech-select[data-qid]) -->
+                    <div class="question-card" style="margin-bottom: 8px;">
+                        <div class="question-title">
+                            <span><strong>Q2 :</strong> Relevé dimensionnel — Indiquez la longueur sous tête de la vis repère 13 (en mm) :</span>
+                            <span class="pts-badge">2.0 PTS</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" id="q2_rep_num" data-qid="q2_rep_num" class="tech-select" placeholder="Exemple : 12" style="max-width: 160px;" oninput="onUserAnswerChange(this)">
+                            <span style="font-size: 13px; font-weight: 700; color: #475569;">mm</span>
+                            <button type="button" id="btn-hint-2" class="hint-btn" onclick="toggleHint('hint-q2', this)" style="margin-left: auto;">
+                                💡 Indice (3 gratuits, puis -0,25 pt)
+                            </button>
+                        </div>
+                        <div id="hint-q2" class="hint-box">
+                            💡 <strong>Indice Q2 :</strong> Observez la désignation normalisée dans la nomenclature : "Vis CHC M5x12". La seconde valeur correspond à la longueur filetée sous tête.
+                        </div>
+                    </div>
+
+                    <!-- Question Type 3 : Question ouverte rédigée (textarea.tech-select[data-qid]) -->
+                    <div class="question-card" style="margin-bottom: 0;">
+                        <div class="question-title">
+                            <span><strong>Q3 :</strong> Analyse technologique rédigée — Justifiez la nature de la liaison complète réalisée :</span>
+                            <span class="pts-badge">2.0 PTS</span>
+                        </div>
+                        <textarea id="q3_rep_redaction" data-qid="q3_rep_redaction" class="tech-select" rows="3" placeholder="Rédigez votre réponse technique ici (ex. démontable, par adhérence, éléments filetés...)" oninput="onUserAnswerChange(this)"></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer A4 -->
+                <table class="footer-table">
+                    <tr>
+                        <td style="width: 50%;">Bac Pro MELEC — TD Construction Mécanique</td>
+                        <td style="width: 50%; text-align: right;">Page 5 / 5 — Exercice 2 : Cotation & Synthèse</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+        <!-- === FIN ZONE EXERCICES MODULAIRES === -->
+
+    </div>
+    <!-- FIN CONTENEUR DES PAGES -->
+
+    <!-- Modal Visualiseur Zoom Plein Écran -->
+    <div id="zoom-modal" class="zoom-modal" onclick="fermerZoomPlan(event)">
+        <div class="zoom-modal-header" onclick="event.stopPropagation()">
+            <span id="zoom-modal-title">Visualiseur Haute Définition</span>
+            <div class="zoom-modal-toolbar">
+                <button onclick="zoomModifier(0.25)">🔍 +</button>
+                <button onclick="zoomModifier(-0.25)">🔍 -</button>
+                <button onclick="zoomReinitialiser()">↺ Réinitialiser</button>
+                <button onclick="fermerZoomPlan(event)" style="background: #dc2626;">✖ Fermer</button>
+            </div>
+        </div>
+        <div id="zoom-modal-body" class="zoom-modal-body" onmousedown="zoomStartPan(event)">
+            <img id="zoom-modal-img" src="" alt="Agrandissement HD" ondragstart="return false;">
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         MOTEUR JAVASCRIPT : CONFIGURATION, SSE STREAMING, INDICES & SÉCURITÉ
+         ========================================================================= -->
+    <script>
+        /* =========================================================================
+           1. CONFIGURATION CENTRALISÉE (CONFIG_TD)
+           ========================================================================= */
+        const CONFIG_TD = {
+            urlRelais: "https://relais-td.onrender.com/soumettre-td-stream",
+            codeTD: "TD_Modele",
+            titreCourtDock: "TD MODÈLE",
+            titreOfficiel: "TD : SOLUTIONS CONSTRUCTIVES D'ASSEMBLAGE",
+            filiere: "Bac Pro MELEC",
+            ficheSyntheseUrl: "Fiche_Synthese.html",
+            totalPointsBruts: 20.0,
+            penaliteParIndice: 0.25,
+            indicesGratuits: 3,
+            competences: [
+                { 
+                    code: "C1", 
+                    libelle: "Compétence C1 (Analyse)", 
+                    descriptionBilan: "Analyser les conditions de l'opération et son contexte", 
+                    mode: "auto_ia" 
+                },
+                { 
+                    code: "C2", 
+                    libelle: "Compétence C2 (Organisation)", 
+                    descriptionBilan: "Organiser le poste de travail (Porte-documents & Stylo)", 
+                    mode: "cases_prof" 
+                }
+            ],
+            baremeQuestions: {
+                "q1_rep_a": { points: 1.0, type: "select", valeur: "Moteur" },
+                "q1_rep_b": { points: 1.0, type: "select", valeur: "Convoyeur à rouleaux" },
+                "q2_rep_num": { points: 2.0, type: "number", valeur: "12" },
+                "q3_rep_redaction": { 
+                    points: 2.0, 
+                    type: "text", 
+                    valeur: "Liaison complète démontable par éléments filetés",
+                    mots_cles: [
+                        { mots: ["démontable", "demontable", "démont", "demont"], points: 1.0, label: "démontable" },
+                        { mots: ["vis", "visser", "vissée", "visse", "viss", "fileté", "filetée", "filet", "éléments filetés"], points: 1.0, label: "par vis / éléments filetés" }
+                    ]
+                }
+            }
+        };
+
+        // État dynamique du TD
+        let isDuoMode = false;
+        let loupeActive = false;
+        const indicesDebloquesSet = new Set();
+        let payloadDechiffreSecours = null;
+
+        const TOUTES_LES_PAGES = [
+            'page-1-garde',
+            'page-2-contexte',
+            'page-3-bilan',
+            'page-4-exercices-1',
+            'page-5-exercices-2'
+        ];
+
+        /* =========================================================================
+           2. SÉCURITÉ ANTI-TRICHE MAXIMALE & RGPD
+           ========================================================================= */
+        // Blocage du clic droit sur l'ensemble de la page
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            return false;
+        });
+
+        // Blocage des touches de développement et raccourcis d'inspection
+        document.addEventListener('keydown', e => {
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+                (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+
+        // Déchiffrement RC4-Drop512 conservé comme solution de secours hors-ligne
+        function rc4Drop512Decrypt(base64Cipher, key) {
+            try {
+                let s = new Array(256);
+                for (let i = 0; i < 256; i++) s[i] = i;
+                let j = 0;
+                for (let i = 0; i < 256; i++) {
+                    j = (j + s[i] + key.charCodeAt(i % key.length)) % 256;
+                    let temp = s[i]; s[i] = s[j]; s[j] = temp;
+                }
+                let i = 0; j = 0;
+                for (let k = 0; k < 512; k++) {
+                    i = (i + 1) % 256;
+                    j = (j + s[i]) % 256;
+                    let temp = s[i]; s[i] = s[j]; s[j] = temp;
+                }
+                let binaryStr = atob(base64Cipher);
+                let plainBytes = new Uint8Array(binaryStr.length);
+                for (let k = 0; k < binaryStr.length; k++) {
+                    i = (i + 1) % 256;
+                    j = (j + s[i]) % 256;
+                    let temp = s[i]; s[i] = s[j]; s[j] = temp;
+                    let K = s[(s[i] + s[j]) % 256];
+                    plainBytes[k] = binaryStr.charCodeAt(k) ^ K;
+                }
+                return new TextDecoder('utf-8').decode(plainBytes);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        /* =========================================================================
+           3. GESTION DES 8 CLASSES ET DES GROUPES
+           ========================================================================= */
+        function toggleBinomeMode() {
+            const check = document.getElementById('check-binome');
+            const boxEleve2 = document.getElementById('box-eleve-2');
+            const badge = document.getElementById('badge-mode-travail');
+            isDuoMode = check.checked;
+
+            if (isDuoMode) {
+                boxEleve2.style.display = 'grid';
+                badge.innerText = 'Mode binôme (2 élèves)';
+                badge.style.background = '#dbeafe';
+                badge.style.color = '#1e40af';
+            } else {
+                boxEleve2.style.display = 'none';
+                badge.innerText = 'Mode individuel';
+                badge.style.background = '#e2e8f0';
+                badge.style.color = '#475569';
+            }
+            mettreAJourIdentite();
+        }
+
+        function mettreAJourIdentite() {
+            const nom1 = document.getElementById('student-nom').value.trim();
+            const prenom1 = document.getElementById('student-prenom').value.trim();
+            const classe = document.getElementById('student-classe').value;
+            const containerGroupe = document.getElementById('container-student-groupe');
+            const wrapperGroupeBilan = document.getElementById('bilan-groupe-wrapper');
+            const selectGroupe = document.getElementById('student-groupe');
+
+            // Règle spécifique 1MELFER MELEC et 1MELFER MFER (pas de groupe)
+            const sansGroupe = (classe === '1MELFER MELEC' || classe === '1MELFER MFER');
+            if (sansGroupe) {
+                if (containerGroupe) containerGroupe.style.display = 'none';
+                if (wrapperGroupeBilan) wrapperGroupeBilan.style.display = 'none';
+            } else {
+                if (containerGroupe) containerGroupe.style.display = 'block';
+                if (wrapperGroupeBilan) wrapperGroupeBilan.style.display = 'inline';
+            }
+
+            let texteIdentite = nom1 ? (nom1.toUpperCase() + ' ' + prenom1) : '--';
+            if (isDuoMode) {
+                const nom2 = document.getElementById('student-nom2').value.trim();
+                const prenom2 = document.getElementById('student-prenom2').value.trim();
+                if (nom2) texteIdentite += ' & ' + nom2.toUpperCase() + ' ' + prenom2;
+            }
+
+            const bilanNom = document.getElementById('bilan-nom-eleve');
+            if (bilanNom) bilanNom.innerText = texteIdentite;
+
+            const bilanClasse = document.getElementById('bilan-classe-eleve');
+            if (bilanClasse) bilanClasse.innerText = classe || '--';
+
+            const bilanGroupe = document.getElementById('bilan-groupe-eleve');
+            if (bilanGroupe) bilanGroupe.innerText = sansGroupe ? '-' : (selectGroupe ? selectGroupe.value : '--');
+        }
+
+        function verifierChampsIdentite() {
+            const nom1 = document.getElementById('student-nom').value.trim();
+            const prenom1 = document.getElementById('student-prenom').value.trim();
+            const classe = document.getElementById('student-classe').value;
+            const selectGroupe = document.getElementById('student-groupe');
+            const sansGroupe = (classe === '1MELFER MELEC' || classe === '1MELFER MFER');
+
+            const manquants = [];
+            if (!nom1) manquants.push("Nom de l'élève 1");
+            if (!prenom1) manquants.push("Prénom de l'élève 1");
+            if (!classe) manquants.push("Classe");
+            if (!sansGroupe && (!selectGroupe || !selectGroupe.value)) manquants.push("Groupe");
+
+            if (isDuoMode) {
+                const nom2 = document.getElementById('student-nom2').value.trim();
+                const prenom2 = document.getElementById('student-prenom2').value.trim();
+                if (!nom2) manquants.push("Nom de l'élève 2");
+                if (!prenom2) manquants.push("Prénom de l'élève 2");
+            }
+
+            return { valide: manquants.length === 0, manquants: manquants };
+        }
+
+        function genererNomFichierBase() {
+            const nom1 = (document.getElementById('student-nom').value.trim() || 'ELEVE1').toUpperCase().replace(/\s+/g, '_');
+            const prenom1 = (document.getElementById('student-prenom').value.trim() || '').replace(/\s+/g, '_');
+            const classe = (document.getElementById('student-classe').value || 'CLASSE').replace(/\s+/g, '_');
+            let base = classe + '_' + nom1 + (prenom1 ? '_' + prenom1 : '');
+            if (isDuoMode) {
+                const nom2 = (document.getElementById('student-nom2').value.trim() || 'ELEVE2').toUpperCase().replace(/\s+/g, '_');
+                const prenom2 = (document.getElementById('student-prenom2').value.trim() || '').replace(/\s+/g, '_');
+                base += '_DUO_' + nom2 + (prenom2 ? '_' + prenom2 : '');
+            }
+            base += '_' + CONFIG_TD.codeTD;
+            return base.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+        }
+
+        /* =========================================================================
+           4. SUIVI DE LA PROGRESSION DES QUESTIONS
+           ========================================================================= */
+        function onUserAnswerChange(elem) {
+            if (elem) {
+                if (elem.value && elem.value.trim().length > 0) elem.classList.add('filled');
+                else elem.classList.remove('filled');
+            }
+        }
+
+        /* =========================================================================
+           5. NAVIGATION & MODES D'AFFICHAGE DOCK
+           ========================================================================= */
+        function basculerModeAffichage(mode) {
+            document.body.classList.remove('mode-vertical', 'mode-single');
+            document.querySelectorAll('.dock-btn').forEach(b => {
+                if (b.id && b.id.startsWith('btn-mode-')) b.classList.remove('active-mode');
+            });
+
+            if (mode === 'vertical') {
+                document.body.classList.add('mode-vertical');
+                document.getElementById('btn-mode-vertical').classList.add('active-mode');
+            } else if (mode === 'single') {
+                document.body.classList.add('mode-single');
+                document.getElementById('btn-mode-single').classList.add('active-mode');
+                naviguerVersPage('page-1-garde');
+            } else {
+                document.getElementById('btn-mode-lignes').classList.add('active-mode');
+            }
+        }
+
+        function naviguerVersPage(pageId) {
+            const tabs = document.querySelectorAll('.dock-tab');
+            const idx = TOUTES_LES_PAGES.indexOf(pageId);
+
+            tabs.forEach((t, i) => {
+                if (i === idx) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+
+            if (document.body.classList.contains('mode-single')) {
+                document.querySelectorAll('.a4-page').forEach(p => p.classList.remove('single-active'));
+                const target = document.getElementById(pageId);
+                if (target) target.classList.add('single-active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                const el = document.getElementById(pageId);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function ouvrirFicheSynthese() {
+            if (CONFIG_TD.ficheSyntheseUrl) {
+                window.open(CONFIG_TD.ficheSyntheseUrl, '_blank');
+            }
+        }
+
+        /* =========================================================================
+           6. SYSTÈME D'INDICES (3 GRATUITS + PÉNALITÉ + BASCULE ANTI-COPIAGE)
+           ========================================================================= */
+        function mettreAJourAffichageIndices() {
+            const total = indicesDebloquesSet.size;
+            const gratuits = CONFIG_TD.indicesGratuits !== undefined ? CONFIG_TD.indicesGratuits : 3;
+            const payants = Math.max(0, total - gratuits);
+            const penalite = (payants * (CONFIG_TD.penaliteParIndice || 0.25)).toFixed(2);
+
+            // 1. Mise à jour dans le dock supérieur
+            const dockCount = document.getElementById('dock-indices-count');
+            if (dockCount) {
+                if (payants > 0) {
+                    dockCount.innerHTML = `<span style="color: #f87171;">${total} utilisé(s) (-${penalite} pt)</span> <span style="color: #94a3b8; font-size: 12px; font-weight: 600;">(${gratuits} gratuits)</span>`;
+                } else {
+                    dockCount.innerHTML = `<span style="color: #60a5fa;">${total} utilisé${total > 1 ? 's' : ''}</span> <span style="color: #94a3b8; font-size: 12px; font-weight: 600;">(${gratuits} gratuits)</span>`;
+                }
+            }
+
+            // 2. Mise à jour dans la Page 1 (Garde)
+            const p1Count = document.getElementById('indices-count-p1');
+            if (p1Count) {
+                if (payants > 0) {
+                    p1Count.innerText = `${total} utilisé(s) (-${penalite} pt)`;
+                } else {
+                    p1Count.innerText = `${total} utilisé(s) (${gratuits} gratuits)`;
+                }
+            }
+
+            // 3. Mise à jour dans la Page 3 (Bilan)
+            const countDisplay = document.getElementById('indices-count-display');
+            if (countDisplay) {
+                if (payants > 0) {
+                    countDisplay.innerText = `${total} utilisé(s) dont ${payants} payant(s) (-${penalite} pt déduit)`;
+                } else {
+                    countDisplay.innerText = `${total} utilisé(s) (${gratuits} gratuits, 0.00 pt déduit)`;
+                }
+            }
+        }
+
+        function toggleHint(hintBoxId, btnElem) {
+            const box = document.getElementById(hintBoxId);
+            if (!box) return;
+
+            // Enregistrement de l'indice débloqué dans le Set (unicité garantie)
+            const dejaDebloque = indicesDebloquesSet.has(hintBoxId);
+            if (!dejaDebloque) {
+                indicesDebloquesSet.add(hintBoxId);
+            }
+
+            // Mise à jour synchrone de tous les compteurs (dock, page 1, page 3)
+            mettreAJourAffichageIndices();
+
+            // Bascule d'affichage pour cacher l'indice aux voisins
+            if (box.style.display === 'block') {
+                box.style.display = 'none';
+                if (btnElem) btnElem.innerHTML = '👁️ Réafficher l\'indice';
+            } else {
+                box.style.display = 'block';
+                if (btnElem) btnElem.innerHTML = '🙈 Masquer l\'indice';
+            }
+        }
+
+        /* =========================================================================
+           7. LOUPE INTERACTIVE HD (GROSSISSEMENT X2.5 CIRCULAIRE)
+           ========================================================================= */
+        function basculerLoupe() {
+            loupeActive = !loupeActive;
+            const btn = document.getElementById('btn-dock-loupe');
+            const lens = document.getElementById('loupe-lens');
+
+            if (loupeActive) {
+                if (btn) {
+                    btn.innerHTML = '✖ Désactiver Loupe';
+                    btn.style.background = '#dc2626';
+                }
+                activerEvenementsLoupe();
+            } else {
+                if (btn) {
+                    btn.innerHTML = '🔎 Activer Loupe';
+                    btn.style.background = '#0284c7';
+                }
+                if (lens) lens.style.display = 'none';
+                desactiverEvenementsLoupe();
+            }
+        }
+
+        function gererMouvementLoupe(e) {
+            if (!loupeActive) return;
+            const lens = document.getElementById('loupe-lens');
+            const frame = e.currentTarget;
+            const img = frame.querySelector('img');
+            if (!lens || !img) return;
+
+            const rect = img.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+                lens.style.display = 'none';
+                return;
+            }
+
+            const zoomFactor = 2.5;
+            lens.style.display = 'block';
+            lens.style.left = (e.clientX - 90) + 'px';
+            lens.style.top = (e.clientY - 90) + 'px';
+
+            lens.style.backgroundImage = 'url("' + img.src + '")';
+            lens.style.backgroundSize = (rect.width * zoomFactor) + 'px ' + (rect.height * zoomFactor) + 'px';
+            lens.style.backgroundPosition = '-' + (x * zoomFactor - 90) + 'px -' + (y * zoomFactor - 90) + 'px';
+        }
+
+        function masquerLoupe() {
+            const lens = document.getElementById('loupe-lens');
+            if (lens) lens.style.display = 'none';
+        }
+
+        function activerEvenementsLoupe() {
+            document.querySelectorAll('.plan-frame').forEach(frame => {
+                frame.addEventListener('mousemove', gererMouvementLoupe);
+                frame.addEventListener('mouseleave', masquerLoupe);
+            });
+        }
+
+        function desactiverEvenementsLoupe() {
+            document.querySelectorAll('.plan-frame').forEach(frame => {
+                frame.removeEventListener('mousemove', gererMouvementLoupe);
+                frame.removeEventListener('mouseleave', masquerLoupe);
+            });
+        }
+
+        /* =========================================================================
+           8. VISUALISEUR ZOOM PLEIN ÉCRAN
+           ========================================================================= */
+        let zoomScale = 1.0;
+        let zoomPanX = 0;
+        let zoomPanY = 0;
+        let isPanning = false;
+        let panStartX = 0;
+        let panStartY = 0;
+
+        function ouvrirZoomPlan(imgSrc, titre) {
+            const modal = document.getElementById('zoom-modal');
+            const img = document.getElementById('zoom-modal-img');
+            const titleElem = document.getElementById('zoom-modal-title');
+            if (!modal || !img) return;
+
+            let finalSrc = imgSrc;
+            if (window.TD_IMAGES_DATA) {
+                const filename = imgSrc.split('/').pop().split('?')[0];
+                if (window.TD_IMAGES_DATA[filename]) {
+                    finalSrc = window.TD_IMAGES_DATA[filename];
+                }
+            }
+
+            img.src = finalSrc;
+            if (titleElem) titleElem.innerText = titre || "Plan Technique Agrandissement HD";
+            modal.classList.add('active');
+            zoomReinitialiser();
+        }
+
+        function fermerZoomPlan(e) {
+            const modal = document.getElementById('zoom-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function zoomModifier(delta) {
+            zoomScale = Math.max(0.5, Math.min(4.0, zoomScale + delta));
+            appliquerTransformZoom();
+        }
+
+        function zoomReinitialiser() {
+            zoomScale = 1.0;
+            zoomPanX = 0;
+            zoomPanY = 0;
+            appliquerTransformZoom();
+        }
+
+        function appliquerTransformZoom() {
+            const img = document.getElementById('zoom-modal-img');
+            if (img) img.style.transform = "translate(" + zoomPanX + "px, " + zoomPanY + "px) scale(" + zoomScale + ")";
+        }
+
+        function zoomStartPan(e) {
+            if (e.target.tagName.toLowerCase() === 'button') return;
+            isPanning = true;
+            panStartX = e.clientX - zoomPanX;
+            panStartY = e.clientY - zoomPanY;
+            e.preventDefault();
+        }
+
+        window.addEventListener('mousemove', function(e) {
+            if (!isPanning) return;
+            zoomPanX = e.clientX - panStartX;
+            zoomPanY = e.clientY - panStartY;
+            appliquerTransformZoom();
+        });
+
+        window.addEventListener('mouseup', function() {
+            isPanning = false;
+        });
+
+        /* =========================================================================
+           9. ÉVALUATION COMPÉTENCE C2 (CASES EN DIRECT PROF)
+           ========================================================================= */
+        function mettreAJourC2() {
+            const c1 = document.getElementById('check-c2-classeur');
+            const c2 = document.getElementById('check-c2-stylo');
+            const badge = document.getElementById('c2-status-badge');
+            if (!badge) return;
+
+            const count = (c1 && c1.checked ? 1 : 0) + (c2 && c2.checked ? 1 : 0);
+            if (count === 2) {
+                badge.className = 'eval-badge eval-vert-fonce';
+                badge.innerText = 'TRÈS BONNE MAÎTRISE';
+            } else if (count === 1) {
+                badge.className = 'eval-badge eval-jaune';
+                badge.innerText = 'MAÎTRISE FRAGILE';
+            } else {
+                badge.className = 'eval-badge eval-rouge';
+                badge.innerText = 'MAÎTRISE INSUFFISANTE';
+            }
+        }
+
+        /* =========================================================================
+           10. MODULE UNIFIÉ D'ÉVALUATION ET DE CORRECTION DES QUESTIONS
+           Permet l'affichage immédiat de la correction sur HTML et dans le PDF
+           ========================================================================= */
+        function evaluerReponseTexteLocale(repTexte, attenteConfig) {
+            if (!repTexte || !repTexte.trim()) {
+                return { points: 0.0, statut: "incorrect", commentaire: "Aucune réponse fournie." };
+            }
+
+            const texteEleve = repTexte.trim().toLowerCase();
+            let ptsMax = 1.0;
+            let valAttendue = "";
+            let motsCles = [];
+
+            if (typeof attenteConfig === 'object' && attenteConfig !== null) {
+                ptsMax = parseFloat(attenteConfig.points !== undefined ? attenteConfig.points : 1.0);
+                valAttendue = attenteConfig.valeur !== undefined ? String(attenteConfig.valeur) : (attenteConfig.reponse || '');
+                if (Array.isArray(attenteConfig.mots_cles)) motsCles = attenteConfig.mots_cles;
+            } else {
+                valAttendue = String(attenteConfig || '');
+            }
+
+            // 1. Égalité directe
+            if (texteEleve === valAttendue.trim().toLowerCase()) {
+                return { points: ptsMax, statut: "correct", commentaire: "Réponse exacte." };
+            }
+
+            // 2. Si des groupes de mots-clés sont explicitement définis dans le barème
+            if (motsCles.length > 0) {
+                let ptsObtenus = 0.0;
+                const notionsTrouvees = [];
+                for (const crit of motsCles) {
+                    const listeMots = Array.isArray(crit.mots) ? crit.mots : [crit.mot];
+                    const ptsCrit = parseFloat(crit.points !== undefined ? crit.points : (ptsMax / motsCles.length));
+                    const label = crit.label || (listeMots[0] || "notion");
+                    if (listeMots.some(m => texteEleve.includes(String(m).toLowerCase()))) {
+                        ptsObtenus += ptsCrit;
+                        notionsTrouvees.push(label);
+                    }
+                }
+                ptsObtenus = Math.min(ptsMax, Math.round(ptsObtenus * 10) / 10);
+                if (ptsObtenus >= ptsMax) {
+                    return { points: ptsMax, statut: "correct", commentaire: "Notions clés identifiées : " + notionsTrouvees.join(", ") };
+                } else if (ptsObtenus > 0) {
+                    return { points: ptsObtenus, statut: "partiel", commentaire: "Notions clés identifiées : " + notionsTrouvees.join(", ") };
+                } else {
+                    return { points: 0.0, statut: "incorrect", commentaire: "Mots-clés attendus non retrouvés." };
+                }
+            }
+
+            // 3. Extraction automatique de mots-clés sémantiques depuis la réponse attendue
+            const motsVides = new Set(["le", "la", "les", "un", "une", "des", "du", "de", "d", "par", "et", "ou", "en", "dans", "sur", "pour", "avec", "sans", "est", "sont"]);
+            const motsSource = (valAttendue.toLowerCase().match(/[a-zà-ÿ0-9]{3,}/g) || []).filter(m => !motsVides.has(m));
+
+            if (motsSource.length === 0) {
+                return { points: 0.0, statut: "incorrect", commentaire: "Réponse incomplète." };
+            }
+
+            function racine(m) {
+                if (m.length > 4) {
+                    if (m.endsWith("er") || m.endsWith("ez") || m.endsWith("es") || m.endsWith("ée") || m.endsWith("és")) return m.slice(0, -2);
+                    if (m.endsWith("s")) return m.slice(0, -1);
+                }
+                return m;
+            }
+
+            const racinesAttendues = motsSource.map(racine);
+            const motsEleve = texteEleve.match(/[a-zà-ÿ0-9]{3,}/g) || [];
+            const racinesEleve = motsEleve.map(racine);
+
+            const trouves = new Set();
+            racinesAttendues.forEach((rAtt, idx) => {
+                if (racinesEleve.some(rEl => rEl.includes(rAtt) || rAtt.includes(rEl))) {
+                    trouves.add(motsSource[idx]);
+                }
+            });
+
+            const ratio = trouves.size / motsSource.length;
+            if (ratio >= 0.60) {
+                return { points: ptsMax, statut: "correct", commentaire: "Réponse très complète." };
+            } else if (trouves.size >= 1 || ratio >= 0.25) {
+                const ratioEff = Math.max(ratio, trouves.size / Math.max(1, Math.min(motsSource.length, 3)));
+                const ptsPartiels = Math.min(ptsMax, Math.round(Math.max(0.5, ptsMax * Math.min(0.75, ratioEff)) * 10) / 10);
+                return { points: ptsPartiels, statut: "partiel", commentaire: "Notions clés identifiées (" + Array.from(trouves).join(", ") + ")" };
+            } else {
+                return { points: 0.0, statut: "incorrect", commentaire: "Réponse insuffisante." };
+            }
+        }
+
+        function evaluerReponsesQuestions(reponses) {
+            let scoreBrut = 0.0;
+            const details = {};
+            const bareme = CONFIG_TD.baremeQuestions || {};
+
+            for (const [qid, attente] of Object.entries(bareme)) {
+                const repBrute = (reponses[qid] || '').trim();
+                let pts = 1.0;
+                let qType = 'text';
+
+                if (typeof attente === 'object' && attente !== null) {
+                    pts = parseFloat(attente.points !== undefined ? attente.points : 1.0);
+                    qType = attente.type || 'text';
+                }
+
+                if (qType === 'text' || qType === 'redaction') {
+                    const resTexte = evaluerReponseTexteLocale(repBrute, attente);
+                    scoreBrut += resTexte.points;
+                    details[qid] = resTexte;
+                } else {
+                    let valAttendue = '';
+                    let altValeurs = [];
+                    if (typeof attente === 'object' && attente !== null) {
+                        valAttendue = attente.valeur !== undefined ? String(attente.valeur) : (attente.reponse !== undefined ? String(attente.reponse) : '');
+                        if (Array.isArray(attente.valeurs)) {
+                            altValeurs = attente.valeurs.map(v => String(v).trim().toLowerCase());
+                        }
+                    } else {
+                        valAttendue = String(attente);
+                    }
+
+                    const repNorm = repBrute.toLowerCase();
+                    const attNorm = valAttendue.trim().toLowerCase();
+                    let isOk = false;
+
+                    if (repNorm.length > 0) {
+                        if (repNorm === attNorm) {
+                            isOk = true;
+                        } else if (altValeurs.includes(repNorm)) {
+                            isOk = true;
+                        } else if (qType === 'number' && !isNaN(parseFloat(repNorm)) && !isNaN(parseFloat(attNorm)) && Math.abs(parseFloat(repNorm) - parseFloat(attNorm)) < 0.01) {
+                            isOk = true;
+                        }
+                    }
+
+                    const ptsAttrib = isOk ? pts : 0.0;
+                    scoreBrut += ptsAttrib;
+                    details[qid] = {
+                        points: ptsAttrib,
+                        statut: isOk ? 'correct' : 'incorrect',
+                        commentaire: isOk ? 'Exact' : 'Incorrect'
+                    };
+                }
+            }
+
+            const denom = CONFIG_TD.totalPointsBruts || 20.0;
+            const note20 = (scoreBrut / denom) * 20.0;
+            return { scoreBrut, note20, details, totalBrut: denom };
+        }
+
+        function insererFeedbackCorrection(elem, qid, feedbackDiv) {
+            // Retrait de tout ancien feedback pour éviter les doublons
+            const ancien = document.querySelector(`.correction-feedback[data-corr-qid="${qid}"]`);
+            if (ancien) ancien.remove();
+
+            const parent = elem.parentElement;
+            if (parent && parent.classList.contains('question-card')) {
+                parent.appendChild(feedbackDiv);
+            } else if (parent && window.getComputedStyle(parent).display === 'flex') {
+                parent.insertAdjacentElement('afterend', feedbackDiv);
+            } else {
+                elem.insertAdjacentElement('afterend', feedbackDiv);
+            }
+        }
+
+        function appliquerCorrectionDossier(detailsQuestions) {
+            const bareme = CONFIG_TD.baremeQuestions || {};
+
+            document.querySelectorAll('[data-qid]').forEach(elem => {
+                const qid = elem.getAttribute('data-qid');
+                const attente = bareme[qid];
+                if (!attente) return;
+
+                let valAttendue = '';
+                let pts = 1.0;
+                let altValeurs = [];
+                let qType = 'text';
+
+                if (typeof attente === 'object' && attente !== null) {
+                    valAttendue = attente.valeur !== undefined ? String(attente.valeur) : (attente.reponse || '');
+                    pts = parseFloat(attente.points !== undefined ? attente.points : 1.0);
+                    qType = attente.type || 'text';
+                    if (Array.isArray(attente.valeurs)) altValeurs = attente.valeurs;
+                } else {
+                    valAttendue = String(attente);
+                }
+
+                const repEleve = (elem.value || '').trim();
+                let evalQ = null;
+
+                if (detailsQuestions && detailsQuestions[qid] !== undefined) {
+                    const rawVal = detailsQuestions[qid];
+                    if (typeof rawVal === 'object' && rawVal !== null) {
+                        const ptsAttrib = parseFloat(rawVal.points !== undefined ? rawVal.points : (rawVal.statut === 'correct' ? pts : 0.0));
+                        evalQ = {
+                            points: ptsAttrib,
+                            statut: rawVal.statut || (ptsAttrib >= pts ? 'correct' : (ptsAttrib > 0 ? 'partiel' : 'incorrect')),
+                            commentaire: rawVal.commentaire || ''
+                        };
+                    } else if (typeof rawVal === 'number') {
+                        evalQ = {
+                            points: rawVal,
+                            statut: rawVal >= pts ? 'correct' : (rawVal > 0 ? 'partiel' : 'incorrect'),
+                            commentaire: ''
+                        };
+                    } else if (typeof rawVal === 'boolean') {
+                        evalQ = {
+                            points: rawVal ? pts : 0.0,
+                            statut: rawVal ? 'correct' : 'incorrect',
+                            commentaire: ''
+                        };
+                    }
+                }
+
+                if (!evalQ) {
+                    if (qType === 'text' || qType === 'redaction' || elem.tagName === 'TEXTAREA') {
+                        evalQ = evaluerReponseTexteLocale(repEleve, attente);
+                    } else {
+                        const repNorm = repEleve.toLowerCase();
+                        const attNorm = valAttendue.trim().toLowerCase();
+                        let isOk = (repNorm === attNorm && repNorm.length > 0) || altValeurs.some(v => String(v).trim().toLowerCase() === repNorm);
+                        if (!isOk && qType === 'number' && !isNaN(parseFloat(repNorm)) && !isNaN(parseFloat(attNorm))) {
+                            isOk = Math.abs(parseFloat(repNorm) - parseFloat(attNorm)) < 0.01;
+                        }
+                        evalQ = { points: isOk ? pts : 0.0, statut: isOk ? 'correct' : 'incorrect', commentaire: isOk ? 'Exact' : 'Incorrect' };
+                    }
+                }
+
+                // 1. Coloration du champ de saisie
+                elem.classList.remove('input-correct', 'input-partial', 'input-wrong');
+                if (evalQ.statut === 'correct') {
+                    elem.classList.add('input-correct');
+                } else if (evalQ.statut === 'partiel') {
+                    elem.classList.add('input-partial');
+                } else {
+                    elem.classList.add('input-wrong');
+                }
+
+                // 2. Verrouillage du champ contre modification post-validation
+                elem.setAttribute('readonly', 'true');
+                if (elem.tagName === 'SELECT') {
+                    elem.style.pointerEvents = 'none';
+                }
+
+                // 3. Création du bloc de feedback pédagogique
+                const ptsObtenusTxt = evalQ.points.toFixed(1);
+                const ptsMaxTxt = pts.toFixed(1);
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.setAttribute('data-corr-qid', qid);
+
+                let affichageAttendu = valAttendue;
+                if (altValeurs.length > 0) {
+                    affichageAttendu = valAttendue + " (ou : " + altValeurs.join(", ") + ")";
+                }
+
+                if (evalQ.statut === 'correct') {
+                    feedbackDiv.className = 'correction-feedback corr-correct';
+                    feedbackDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+                            <span style="font-weight: 800; color: #15803d; font-size: 13.5px;">✔ Réponse validée</span>
+                            <span class="pts-badge" style="background: #dcfce7; color: #166534; font-weight: 800; border: 1px solid #86efac;">+${ptsObtenusTxt} / ${ptsMaxTxt} PT${pts > 1 ? 'S' : ''}</span>
+                        </div>
+                        ${evalQ.commentaire ? `<div style="font-size: 12px; color: #166534; margin-bottom: 2px;">💡 ${evalQ.commentaire}</div>` : ''}
+                        <div class="correction-attendue-box" style="margin-top: 3px;">
+                            <span style="color: #166534; font-weight: 800;">✔ Formulation attendue :</span>
+                            <strong style="font-size: 13.5px; color: #14532d; text-decoration: underline; margin-left: 4px;">${affichageAttendu}</strong>
+                        </div>
+                    `;
+                } else if (evalQ.statut === 'partiel') {
+                    feedbackDiv.className = 'correction-feedback corr-partial';
+                    feedbackDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+                            <span style="font-weight: 800; color: #b45309; font-size: 13.5px;">✔ Réponse partiellement validée</span>
+                            <span class="pts-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a;">+${ptsObtenusTxt} / ${ptsMaxTxt} PT${pts > 1 ? 'S' : ''}</span>
+                        </div>
+                        <div style="font-size: 12.5px; color: #92400e; margin-bottom: 2px;">
+                            💡 ${evalQ.commentaire || "Des éléments clés pertinents ont été identifiés dans votre réponse."}
+                        </div>
+                        <div class="correction-attendue-box" style="background-color: #fefce8; border: 1.5px solid #ca8a04; color: #854d0e; margin-top: 3px;">
+                            <span style="color: #854d0e; font-weight: 800;">✔ Formulation complète attendue :</span>
+                            <strong style="font-size: 13.5px; color: #713f12; text-decoration: underline; margin-left: 4px;">${affichageAttendu}</strong>
+                        </div>
+                    `;
+                } else {
+                    feedbackDiv.className = 'correction-feedback corr-wrong';
+                    feedbackDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+                            <span style="font-weight: 800; color: #dc2626; font-size: 13.5px;">❌ Réponse incorrecte</span>
+                            <span class="pts-badge" style="background: #fee2e2; color: #991b1b; font-weight: 800; border: 1px solid #fca5a5;">0.0 / ${ptsMaxTxt} PT${pts > 1 ? 'S' : ''}</span>
+                        </div>
+                        ${evalQ.commentaire ? `<div style="font-size: 12px; color: #991b1b; margin-bottom: 2px;">⚠️ ${evalQ.commentaire}</div>` : ''}
+                        <div class="correction-attendue-box" style="background-color: #fef2f2; border: 1.5px solid #ef4444; color: #991b1b; margin-top: 3px;">
+                            <span style="color: #991b1b; font-weight: 800;">✔ Réponse attendue :</span>
+                            <strong style="font-size: 13.5px; color: #7f1d1d; text-decoration: underline; margin-left: 4px;">${affichageAttendu}</strong>
+                        </div>
+                    `;
+                }
+
+                // 4. Insertion dans le document
+                insererFeedbackCorrection(elem, qid, feedbackDiv);
+            });
+        }
+
+        function retirerCorrectionDossier() {
+            document.querySelectorAll('.correction-feedback').forEach(el => el.remove());
+            document.querySelectorAll('[data-qid]').forEach(elem => {
+                elem.classList.remove('input-correct', 'input-partial', 'input-wrong');
+                elem.removeAttribute('readonly');
+                if (elem.tagName === 'SELECT') {
+                    elem.style.pointerEvents = 'auto';
+                }
+            });
+
+            // Remise à zéro des badges de compétences en attente
+            if (Array.isArray(CONFIG_TD.competences)) {
+                CONFIG_TD.competences.forEach(comp => {
+                    const badge = document.getElementById('eval-' + comp.code.toLowerCase() + '-palier');
+                    if (badge) {
+                        badge.className = 'eval-badge eval-pending';
+                        badge.innerText = 'EN ATTENTE';
+                    }
+                });
+            }
+
+            const noteElem = document.getElementById('global-score-converted');
+            if (noteElem) noteElem.innerText = "--.- / 20";
+            const rawElem = document.getElementById('global-score-raw');
+            if (rawElem) rawElem.innerText = "0.0 / 20.0 pts";
+            const statusTextElem = document.getElementById('prof-eval-status-text');
+            if (statusTextElem) {
+                statusTextElem.innerText = "Dossier en attente de validation par l'enseignant";
+            }
+            mettreAJourC2();
+            window.lastGeneratedPDF = null;
+        }
+
+        /* =========================================================================
+           11. GÉNÉRATION PDF A4 HAUTE FIDÉLITÉ (HTML2CANVAS & JSPDF)
+           ========================================================================= */
+        async function construireDossierCompletPDF() {
+            try {
+                const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+                if (typeof html2canvas === 'undefined' || !jsPDFClass) {
+                    console.warn("Librairies PDF html2canvas ou jsPDF non chargées.");
+                    return null;
+                }
+
+                const pdf = new jsPDFClass({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
+                    compress: true
+                });
+
+                const wasSingleMode = document.body.classList.contains('mode-single');
+                if (wasSingleMode) document.body.classList.remove('mode-single');
+
+                // Substitution des images par les données Base64 pour zéro latence réseau
+                if (window.TD_IMAGES_DATA) {
+                    document.querySelectorAll('img').forEach(img => {
+                        const src = img.getAttribute('src');
+                        if (src) {
+                            const filename = src.split('/').pop().split('?')[0];
+                            if (window.TD_IMAGES_DATA[filename]) {
+                                img.src = window.TD_IMAGES_DATA[filename];
+                            }
+                        }
+                    });
+                }
+
+                for (let i = 0; i < TOUTES_LES_PAGES.length; i++) {
+                    const pageElem = document.getElementById(TOUTES_LES_PAGES[i]);
+                    if (!pageElem) continue;
+
+                    const canvas = await html2canvas(pageElem, {
+                        scale: 1.8,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        onclone: (clonedDoc) => {
+                            // 1. Injection stricte de la typographie Arial 14px sur tout le document cloné
+                            const pdfStyle = clonedDoc.createElement('style');
+                            pdfStyle.id = 'pdf-strict-arial14-style';
+                            pdfStyle.innerHTML = `
+                                * {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                }
+                                body, .a4-page {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                    font-size: 14px !important;
+                                    line-height: 1.35 !important;
+                                }
+                                p, span, div, td, th, label, input, select, textarea, .question-card, .section-box {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                    font-size: 14px !important;
+                                }
+                                .header-table td {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                    font-size: 12.5px !important;
+                                }
+                                .header-title, .header-title span {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                    font-size: 14.5px !important;
+                                    font-weight: 800 !important;
+                                }
+                                .footer-table td {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                    font-size: 11px !important;
+                                }
+                                #global-score-converted {
+                                    font-size: 34px !important;
+                                    font-weight: 900 !important;
+                                }
+                                /* Styles explicites de la correction dans le PDF */
+                                .correction-feedback {
+                                    display: block !important;
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                    font-size: 13px !important;
+                                    line-height: 1.35 !important;
+                                    margin-top: 5px !important;
+                                    margin-bottom: 3px !important;
+                                }
+                                .correction-feedback * {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                }
+                                .corr-correct {
+                                    background-color: #f0fdf4 !important;
+                                    border: 1.5px solid #86efac !important;
+                                    color: #15803d !important;
+                                    padding: 4px 8px !important;
+                                    border-radius: 4px !important;
+                                }
+                                .corr-partial {
+                                    background-color: #fefce8 !important;
+                                    border: 1.5px solid #fde047 !important;
+                                    color: #854d0e !important;
+                                    padding: 5px 8px !important;
+                                    border-radius: 4px !important;
+                                }
+                                .corr-wrong {
+                                    background-color: #fef2f2 !important;
+                                    border: 1.5px solid #fca5a5 !important;
+                                    color: #991b1b !important;
+                                    padding: 5px 8px !important;
+                                    border-radius: 4px !important;
+                                }
+                                .correction-attendue-box {
+                                    display: block !important;
+                                    background-color: #f0fdf4 !important;
+                                    border: 1.5px solid #16a34a !important;
+                                    border-radius: 4px !important;
+                                    padding: 4px 8px !important;
+                                    color: #15803d !important;
+                                    font-weight: bold !important;
+                                    font-size: 13px !important;
+                                    margin-top: 3px !important;
+                                }
+                                /* Masquage STRICT et absolu du bandeau enseignant et boutons d'action */
+                                #section-prof-auth, .section-prof-box, #prof-auth-box, #prof-validated-box, #prof-error-msg,
+                                .btn-hint, .zoom-btn-overlay {
+                                    display: none !important;
+                                    visibility: hidden !important;
+                                    height: 0 !important;
+                                    max-height: 0 !important;
+                                    overflow: hidden !important;
+                                    padding: 0 !important;
+                                    margin: 0 !important;
+                                    border: none !important;
+                                }
+                                .eval-badge {
+                                    display: inline-block !important;
+                                    padding: 3px 8px !important;
+                                    border-radius: 4px !important;
+                                    font-size: 11.5px !important;
+                                    font-weight: 800 !important;
+                                    text-transform: uppercase !important;
+                                    letter-spacing: 0.3px !important;
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                }
+                                .eval-pending { background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5 !important; }
+                                .eval-vert-fonce { background: #15803d !important; color: white !important; border: 1px solid #166534 !important; }
+                                .eval-vert-clair { background: #84cc16 !important; color: #0f172a !important; border: 1px solid #65a30d !important; }
+                                .eval-jaune { background: #eab308 !important; color: #0f172a !important; border: 1px solid #ca8a04 !important; }
+                                .eval-rouge { background: #dc2626 !important; color: white !important; border: 1px solid #b91c1c !important; }
+                                .pdf-input-converted {
+                                    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+                                    font-size: 14px !important;
+                                }
+                            `;
+                            clonedDoc.head.appendChild(pdfStyle);
+
+                            // Retrait STRICT et exhaustif du bandeau enseignant et des overlays de tout le document cloné
+                            clonedDoc.querySelectorAll('#section-prof-auth, .section-prof-box, #prof-auth-box, #prof-validated-box, #prof-error-msg, .btn-hint, .zoom-btn-overlay').forEach(el => el.remove());
+
+                            const clonedPage = clonedDoc.getElementById(TOUTES_LES_PAGES[i]);
+                            if (clonedPage) {
+
+                                // Conversion des select en div typographiées Arial 14px avec état corrigé
+                                clonedPage.querySelectorAll('select').forEach(sel => {
+                                    const val = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+                                    const div = clonedDoc.createElement('div');
+                                    div.className = sel.className + ' pdf-input-converted';
+                                    div.style.cssText = sel.style.cssText;
+                                    div.style.display = 'inline-block';
+                                    div.style.padding = '5px 10px';
+                                    div.style.fontWeight = 'bold';
+                                    div.style.fontSize = '14px';
+                                    div.style.fontFamily = 'Arial, "Helvetica Neue", Helvetica, sans-serif';
+
+                                    const isCorrect = sel.classList.contains('input-correct');
+                                    const isPartial = sel.classList.contains('input-partial');
+                                    const isWrong = sel.classList.contains('input-wrong');
+
+                                    if (isCorrect) {
+                                        div.style.border = '2px solid #16a34a';
+                                        div.style.background = '#f0fdf4';
+                                        div.style.color = '#15803d';
+                                        div.innerText = '✔ ' + (val || sel.value);
+                                    } else if (isPartial) {
+                                        div.style.border = '2px solid #d97706';
+                                        div.style.background = '#fffbeb';
+                                        div.style.color = '#92400e';
+                                        div.innerText = '✔ ' + (val || sel.value);
+                                    } else if (isWrong) {
+                                        div.style.border = '2px solid #dc2626';
+                                        div.style.background = '#fef2f2';
+                                        div.style.color = '#b91c1c';
+                                        div.innerText = '❌ ' + (val || sel.value || '-- Aucune sélection --');
+                                    } else {
+                                        div.style.border = sel.value ? '1.5px solid #2563eb' : '1px solid #cbd5e1';
+                                        div.style.background = sel.value ? '#eff6ff' : '#ffffff';
+                                        div.style.color = sel.value ? '#1e3a8a' : '#94a3b8';
+                                        div.innerText = val || '-- Non renseigné --';
+                                    }
+                                    sel.parentNode.replaceChild(div, sel);
+                                });
+
+                                // Conversion des textarea et input en div typographiées Arial 14px avec état corrigé
+                                clonedPage.querySelectorAll('textarea, input[type="text"], input[type="number"]').forEach(inp => {
+                                    if (inp.id === 'prof-code') return;
+                                    const div = clonedDoc.createElement('div');
+                                    div.className = inp.className + ' pdf-input-converted';
+                                    div.style.cssText = inp.style.cssText;
+                                    div.style.padding = '6px 10px';
+                                    div.style.fontWeight = 'bold';
+                                    div.style.fontSize = '14px';
+                                    div.style.fontFamily = 'Arial, "Helvetica Neue", Helvetica, sans-serif';
+
+                                    const isCorrect = inp.classList.contains('input-correct');
+                                    const isPartial = inp.classList.contains('input-partial');
+                                    const isWrong = inp.classList.contains('input-wrong');
+
+                                    if (isCorrect) {
+                                        div.style.border = '2px solid #16a34a';
+                                        div.style.background = '#f0fdf4';
+                                        div.style.color = '#15803d';
+                                        div.innerText = '✔ ' + (inp.value || '-- Renseigné --');
+                                    } else if (isPartial) {
+                                        div.style.border = '2px solid #d97706';
+                                        div.style.background = '#fffbeb';
+                                        div.style.color = '#92400e';
+                                        div.innerText = '✔ (Partiel) ' + (inp.value || '-- Renseigné --');
+                                    } else if (isWrong) {
+                                        div.style.border = '2px solid #dc2626';
+                                        div.style.background = '#fef2f2';
+                                        div.style.color = '#b91c1c';
+                                        div.innerText = '❌ ' + (inp.value || '-- Aucune réponse fournie --');
+                                    } else {
+                                        div.style.border = inp.value ? '1.5px solid #2563eb' : '1px solid #cbd5e1';
+                                        div.style.background = inp.value ? '#eff6ff' : '#ffffff';
+                                        div.style.color = inp.value ? '#1e3a8a' : '#94a3b8';
+                                        div.innerText = inp.value || '-- Non renseigné --';
+                                    }
+                                    inp.parentNode.replaceChild(div, inp);
+                                });
+
+                                // Conversion des cases à cocher en boîtes visuelles fidèles préservant l'état coché
+                                clonedPage.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+                                    const origInput = document.getElementById(chk.id);
+                                    const isChecked = origInput ? origInput.checked : chk.checked;
+                                    const span = clonedDoc.createElement('span');
+                                    span.style.display = 'inline-flex';
+                                    span.style.alignItems = 'center';
+                                    span.style.justifyContent = 'center';
+                                    span.style.width = '16px';
+                                    span.style.height = '16px';
+                                    span.style.minWidth = '16px';
+                                    span.style.minHeight = '16px';
+                                    span.style.border = isChecked ? '2px solid #2563eb' : '2px solid #94a3b8';
+                                    span.style.borderRadius = '3px';
+                                    span.style.backgroundColor = isChecked ? '#2563eb' : '#ffffff';
+                                    span.style.color = '#ffffff';
+                                    span.style.fontSize = '12px';
+                                    span.style.fontWeight = 'bold';
+                                    span.style.marginRight = '6px';
+                                    span.style.verticalAlign = 'middle';
+                                    span.style.lineHeight = '1';
+                                    span.innerText = isChecked ? '✔' : '';
+                                    chk.parentNode.replaceChild(span, chk);
+                                });
+                            }
+                        }
+                    });
+
+                    const imgData = canvas.toDataURL('image/jpeg', 0.90);
+                    if (i > 0) pdf.addPage('a4', 'portrait');
+                    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+                }
+
+                if (wasSingleMode) document.body.classList.add('mode-single');
+                window.lastGeneratedPDF = pdf;
+                return pdf;
+            } catch (e) {
+                console.error("Erreur lors de la génération PDF :", e);
+                return null;
+            }
+        }
+
+        async function genererDossierCompletPDFBase64() {
+            try {
+                let pdf = window.lastGeneratedPDF;
+                if (!pdf) {
+                    pdf = await construireDossierCompletPDF();
+                }
+                if (!pdf) return null;
+                const dataUri = pdf.output('datauristring');
+                const base64Index = dataUri.indexOf('base64,');
+                return base64Index !== -1 ? dataUri.substring(base64Index + 7) : null;
+            } catch (e) {
+                console.warn("Échec export PDF Base64 :", e);
+                return null;
+            }
+        }
+
+        async function exporterDossierPDF() {
+            const baseNom = genererNomFichierBase();
+            const nomFichierPDF = baseNom + '.pdf';
+
+            try {
+                let pdf = window.lastGeneratedPDF;
+                if (!pdf) {
+                    pdf = await construireDossierCompletPDF();
+                }
+                if (pdf) {
+                    pdf.save(nomFichierPDF);
+                } else {
+                    throw new Error("Génération impossible.");
+                }
+            } catch (err) {
+                alert("Erreur lors du téléchargement PDF : " + err.message);
+            }
+        }
+
+        /* =========================================================================
+           11. MODE SECOURS LOCAL : TÉLÉCHARGEMENT DU PDF EN LOCAL
+           Téléchargement immédiat sans interrompre ni annuler l'envoi vers le serveur
+           ========================================================================= */
+        async function telechargerPDFSecoursLocal() {
+            // 1. Contrôle strict : la saisie du code enseignant est obligatoire
+            const code = document.getElementById('prof-code').value.trim();
+            if (!code) {
+                alert("Action impossible : le code enseignant doit être saisi pour autoriser le téléchargement.");
+                return;
+            }
+
+            const check = verifierChampsIdentite();
+            if (!check.valide) {
+                alert("Identification incomplète : " + check.manquants.join(", "));
+                naviguerVersPage('page-1-garde');
+                return;
+            }
+
+            const btnSecoursModal = document.getElementById('btn-sse-secours');
+            const btnSecoursBox = document.getElementById('btn-secours-prof-box');
+            if (btnSecoursModal) {
+                btnSecoursModal.innerText = "⏳ Téléchargement PDF en cours...";
+                btnSecoursModal.disabled = true;
+            }
+            if (btnSecoursBox) {
+                btnSecoursBox.innerText = "⏳ Téléchargement...";
+                btnSecoursBox.disabled = true;
+            }
+
+            // S'assurer que le bandeau enseignant est masqué pour le PDF
+            const sectionProfAuth = document.getElementById('section-prof-auth');
+            if (sectionProfAuth) sectionProfAuth.style.display = 'none';
+
+            // S'assurer que la correction et les compétences certifiées sont appliquées avant l'export de secours
+            const reponsesSecours = {};
+            document.querySelectorAll('[data-qid]').forEach(elem => {
+                reponsesSecours[elem.getAttribute('data-qid')] = elem.value.trim();
+            });
+            const evalSecours = evaluerReponsesQuestions(reponsesSecours);
+            appliquerCorrectionDossier(evalSecours.details);
+
+            const scoreBrutSec = evalSecours.scoreBrut;
+            const denomSec = evalSecours.totalBrut;
+            const note20Sec = evalSecours.note20;
+            const payantsSec = Math.max(0, indicesDebloquesSet.size - (CONFIG_TD.indicesGratuits !== undefined ? CONFIG_TD.indicesGratuits : 3));
+            const noteFinaleSec = Math.max(0.0, Math.min(20.0, Math.round((note20Sec - (payantsSec * (CONFIG_TD.penaliteParIndice || 0.25))) * 10) / 10));
+
+            const noteElem = document.getElementById('global-score-converted');
+            if (noteElem) noteElem.innerText = noteFinaleSec.toFixed(1) + " / 20";
+            const rawElem = document.getElementById('global-score-raw');
+            if (rawElem) rawElem.innerText = scoreBrutSec.toFixed(1) + " / " + denomSec.toFixed(1) + " pts";
+            mettreAJourAffichageIndices();
+
+            const { compObj: compSec } = calculerCompetencesLocales(noteFinaleSec);
+            mettreAJourBadgesCompetences(compSec);
+            mettreAJourC2();
+
+            const statusTextElem = document.getElementById('prof-eval-status-text');
+            if (statusTextElem) {
+                statusTextElem.innerHTML = "<span style='color: #15803d; font-weight: bold;'>✅ Dossier validé et certifié conforme</span>";
+            }
+
+            try {
+                // Téléchargement immédiat du PDF local : L'envoi réseau continue en arrière-plan sans interruption !
+                await exporterDossierPDF();
+
+                if (btnSecoursModal) {
+                    btnSecoursModal.innerText = "✅ PDF de secours téléchargé !";
+                    btnSecoursModal.style.background = "#16a34a";
+                    btnSecoursModal.disabled = false;
+                }
+                if (btnSecoursBox) {
+                    btnSecoursBox.innerText = "✅ PDF téléchargé";
+                    btnSecoursBox.style.background = "#16a34a";
+                    btnSecoursBox.disabled = false;
+                }
+            } catch (err) {
+                console.error("Erreur lors de l'exportation du PDF de secours :", err);
+                if (btnSecoursModal) {
+                    btnSecoursModal.innerText = "🆘 Réessayer le téléchargement PDF";
+                    btnSecoursModal.disabled = false;
+                }
+                if (btnSecoursBox) {
+                    btnSecoursBox.innerText = "🆘 Réessayer le téléchargement PDF";
+                    btnSecoursBox.disabled = false;
+                }
+            } finally {
+                // Si la transmission n'est pas active (ex: secours hors-ligne après échec réseau), rétablir l'affichage
+                const sseModal = document.getElementById('sync-sse-modal');
+                const isModalOpen = sseModal && sseModal.style.display === 'flex';
+                if (!isModalOpen && sectionProfAuth) {
+                    sectionProfAuth.style.display = 'block';
+                }
+            }
+        }
+
+        /* =========================================================================
+           12. VALIDATION OFFICIELLE DU TD & PIPELINE SSE STREAMING
+           ========================================================================= */
+        async function validerTD() {
+            const errorElem = document.getElementById('prof-error-msg');
+            errorElem.style.display = 'none';
+
+            // 1. Contrôle des champs d'identification
+            const checkIdentite = verifierChampsIdentite();
+            if (!checkIdentite.valide) {
+                errorElem.innerHTML = "⚠️ <strong>Identification obligatoire !</strong> Veuillez renseigner en Page 1 : <u>" + 
+                    checkIdentite.manquants.join(", ") + "</u> avant de valider.";
+                errorElem.style.display = 'block';
+                naviguerVersPage('page-1-garde');
+                return;
+            }
+
+            // 2. Contrôle de saisie du PIN enseignant (OBLIGATOIRE)
+            const codePin = document.getElementById('prof-code').value.trim();
+            if (!codePin) {
+                errorElem.innerText = "Veuillez appeler votre professeur pour valider votre travail.";
+                errorElem.style.display = 'block';
+                return;
+            }
+
+            // 3. Activation du bouton de secours pendant le processus d'envoi
+            const btnSecoursBox = document.getElementById('btn-secours-prof-box');
+            if (btnSecoursBox) btnSecoursBox.style.display = 'inline-block';
+
+            // 4. Verrouillage de la page contre fermeture accidentelle
+            window.addEventListener('beforeunload', empecherFermeturePage);
+
+            // 5. Ouverture de la modale SSE bloquante
+            const sseModal = document.getElementById('sync-sse-modal');
+            const sseBar = document.getElementById('sse-live-progress-bar');
+            const ssePct = document.getElementById('sse-progress-pct');
+            const sseMsg = document.getElementById('sse-live-message');
+            const step1 = document.getElementById('sse-step-1');
+            const step2 = document.getElementById('sse-step-2');
+            const step3 = document.getElementById('sse-step-3');
+
+            if (sseModal) sseModal.style.display = 'flex';
+            if (sseBar) sseBar.style.width = '10%';
+            if (ssePct) ssePct.innerText = '10%';
+            if (sseMsg) sseMsg.innerText = 'Préparation de la copie et génération PDF haute fidélité...';
+
+            // Collecte des réponses de l'élève
+            const reponses = {};
+            document.querySelectorAll('[data-qid]').forEach(elem => {
+                const qid = elem.getAttribute('data-qid');
+                reponses[qid] = elem.value.trim();
+            });
+
+            // Évaluation immédiate et affichage complet de la correction
+            const evalLocale = evaluerReponsesQuestions(reponses);
+            appliquerCorrectionDossier(evalLocale.details);
+
+            // Préparation des compétences (en incluant l'état de C2)
+            const c1Checked = document.getElementById('check-c2-classeur')?.checked;
+            const c2Checked = document.getElementById('check-c2-stylo')?.checked;
+            const countC2 = (c1Checked ? 1 : 0) + (c2Checked ? 1 : 0);
+            const palierC2 = countC2 === 2 ? 'TRÈS BONNE MAÎTRISE' : (countC2 === 1 ? 'MAÎTRISE FRAGILE' : 'MAÎTRISE INSUFFISANTE');
+
+            const competencesPayload = CONFIG_TD.competences.map(c => {
+                if (c.code === 'C2' || c.mode === 'cases_prof') {
+                    return { ...c, valeur_manuelle: palierC2 };
+                }
+                return c;
+            });
+
+            // Calcul du score et mise à jour de l'affichage pour le PDF
+            const scoreBrutPrev = evalLocale.scoreBrut;
+            const denomPrev = evalLocale.totalBrut;
+            const note20Prev = evalLocale.note20;
+            const payantsPrev = Math.max(0, indicesDebloquesSet.size - (CONFIG_TD.indicesGratuits !== undefined ? CONFIG_TD.indicesGratuits : 3));
+            const noteFinalePrev = Math.max(0.0, Math.min(20.0, Math.round((note20Prev - (payantsPrev * (CONFIG_TD.penaliteParIndice || 0.25))) * 10) / 10));
+
+            const noteElem = document.getElementById('global-score-converted');
+            if (noteElem) noteElem.innerText = noteFinalePrev.toFixed(1) + " / 20";
+            const rawElem = document.getElementById('global-score-raw');
+            if (rawElem) rawElem.innerText = scoreBrutPrev.toFixed(1) + " / " + denomPrev.toFixed(1) + " pts";
+            mettreAJourAffichageIndices();
+
+            // Mise à jour immédiate et synchrone des badges de compétences et du statut certifié pour le PDF
+            const { compObj: compLocales } = calculerCompetencesLocales(noteFinalePrev);
+            mettreAJourBadgesCompetences(compLocales);
+            mettreAJourC2();
+
+            const statusTextElem = document.getElementById('prof-eval-status-text');
+            if (statusTextElem) {
+                statusTextElem.innerHTML = "<span style='color: #15803d; font-weight: bold;'>✅ Dossier validé et certifié conforme</span>";
+            }
+
+            // Masquer le bandeau enseignant avant génération PDF
+            const sectionProfAuth = document.getElementById('section-prof-auth');
+            if (sectionProfAuth) sectionProfAuth.style.display = 'none';
+
+            // Génération PDF Base64 (capturant toute la correction intégrée et les badges certifiés !)
+            window.lastGeneratedPDF = null;
+            let pdfBase64 = null;
+            try {
+                pdfBase64 = await genererDossierCompletPDFBase64();
+            } catch (e) {
+                console.warn("Avertissement génération PDF :", e);
+            }
+
+            const nomFichierBase = genererNomFichierBase();
+            const nom1 = document.getElementById('student-nom').value.trim();
+            const prenom1 = document.getElementById('student-prenom').value.trim();
+            const nom2 = isDuoMode ? document.getElementById('student-nom2').value.trim() : '';
+            const prenom2 = isDuoMode ? document.getElementById('student-prenom2').value.trim() : '';
+            const classe = document.getElementById('student-classe').value;
+            const sansGroupe = (classe === '1MELFER MELEC' || classe === '1MELFER MFER');
+            const groupe = sansGroupe ? '-' : (document.getElementById('student-groupe').value || '-');
+
+            const payload = {
+                pin: codePin,
+                sujet: CONFIG_TD.titreOfficiel,
+                classe: classe,
+                groupe: groupe,
+                binome: isDuoMode ? "Binôme" : "Individuel",
+                eleve_1: nom1.toUpperCase() + ' ' + prenom1,
+                eleve_2: isDuoMode ? (nom2.toUpperCase() + ' ' + prenom2) : '-',
+                indices_utilises: indicesDebloquesSet.size,
+                total_points_bruts: CONFIG_TD.totalPointsBruts,
+                competences: competencesPayload,
+                bareme: CONFIG_TD.baremeQuestions,
+                reponses: reponses,
+                pdf_base64: pdfBase64,
+                nom_fichier: nomFichierBase
+            };
+
+            // 6. Connexion SSE au serveur FastAPI (sans interruption si téléchargement PDF local)
+            try {
+                const response = await fetch(CONFIG_TD.urlRelais, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erreur serveur relais HTTP " + response.status);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n\n');
+                    buffer = lines.pop(); // Garder la dernière portion incomplète
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed.startsWith('data:')) continue;
+                        const jsonStr = trimmed.replace(/^data:\s*/, '');
+                        let data;
+                        try {
+                            data = JSON.parse(jsonStr);
+                        } catch (e) {
+                            continue;
+                        }
+
+                        if (data.erreur) {
+                            throw new Error(data.erreur);
+                        }
+
+                        // Mise à jour de la barre et des étapes
+                        if (data.pct && sseBar) {
+                            sseBar.style.width = data.pct + '%';
+                            if (ssePct) ssePct.innerText = data.pct + '%';
+                        }
+                        if (data.message && sseMsg) {
+                            sseMsg.innerText = data.message;
+                        }
+
+                        if (data.etape === 1 && step1) step1.className = 'sse-step-item active';
+                        if (data.etape === 2) {
+                            if (step1) step1.className = 'sse-step-item done';
+                            if (step2) step2.className = 'sse-step-item active';
+                        }
+                        if (data.etape === 3) {
+                            if (step2) step2.className = 'sse-step-item done';
+                            if (step3) step3.className = 'sse-step-item active';
+                        }
+
+                        // Événement terminal (100 %)
+                        if (data.statut === 'termine') {
+                            if (step3) step3.className = 'sse-step-item done';
+                            traiterResultatFinal(data);
+                            setTimeout(() => {
+                                if (sseModal) sseModal.style.display = 'none';
+                                window.removeEventListener('beforeunload', empecherFermeturePage);
+                            }, 1200);
+                            return;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("Échec streaming SSE :", err);
+                const msgErr = (err && err.message) ? err.message : String(err);
+
+                // Si le serveur a rejeté le code enseignant
+                if (msgErr.includes("Code enseignant") || msgErr.includes("incorrect")) {
+                    const sseModal = document.getElementById('sync-sse-modal');
+                    if (sseModal) sseModal.style.display = 'none';
+                    window.removeEventListener('beforeunload', empecherFermeturePage);
+
+                    // Annulation stricte de la correction pour éviter toute triche
+                    retirerCorrectionDossier();
+
+                    const errorElem = document.getElementById('prof-error-msg');
+                    if (errorElem) {
+                        errorElem.innerText = "❌ Code enseignant incorrect. Validation annulée.";
+                        errorElem.style.display = 'block';
+                    }
+                    const sectionProfAuth = document.getElementById('section-prof-auth');
+                    if (sectionProfAuth) sectionProfAuth.style.display = 'block';
+                    return;
+                }
+
+                // Bascule automatique sur secours local uniquement si le réseau coupe
+                if (sseMsg) sseMsg.innerHTML = "<span style='color: #dc2626; font-weight: bold;'>⚠️ Serveur distant injoignable.</span> Finalisation locale du dossier...";
+                setTimeout(() => {
+                    const sseModal = document.getElementById('sync-sse-modal');
+                    if (sseModal) sseModal.style.display = 'none';
+                    window.removeEventListener('beforeunload', empecherFermeturePage);
+                    evaluerLocalementSecours(reponses);
+                    exporterDossierPDF();
+                }, 1500);
+            }
+        }
+
+        function empecherFermeturePage(e) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        }
+
+        /* =========================================================================
+           13. TRAITEMENT DU RÉSULTAT FINAL (CLASSEUR, BADGES & TÉLÉCHARGEMENT)
+           ========================================================================= */
+        function traiterResultatFinal(data) {
+            // 1. Déverrouillage de l'espace enseignant (affichage écran certifié)
+            const sectionProf = document.getElementById('section-prof-auth');
+            if (sectionProf) sectionProf.style.display = 'block';
+            document.getElementById('prof-auth-box').style.display = 'none';
+            document.getElementById('prof-validated-box').style.display = 'block';
+            window.lastGeneratedPDF = null;
+
+            const dockBadge = document.getElementById('dock-status-badge');
+            if (dockBadge) {
+                dockBadge.className = 'dock-status-badge status-validated';
+                dockBadge.innerText = 'Validé (' + data.note.toFixed(1) + '/20)';
+            }
+
+            const btnPdf = document.getElementById('btn-dock-pdf');
+            if (btnPdf) {
+                btnPdf.disabled = false;
+                btnPdf.style.opacity = '1';
+                btnPdf.style.cursor = 'pointer';
+            }
+
+            const savedFileName = document.getElementById('saved-filename-display');
+            if (savedFileName) savedFileName.innerText = genererNomFichierBase() + '.pdf';
+
+            // 2. Affichage Note et Scores
+            const noteElem = document.getElementById('global-score-converted');
+            if (noteElem) noteElem.innerText = data.note.toFixed(1) + " / 20";
+
+            const rawScoreElem = document.getElementById('global-score-raw');
+            if (rawScoreElem) rawScoreElem.innerText = data.score_brut.toFixed(1) + " / " + data.total_brut.toFixed(1) + " pts";
+
+            const countDisplay = document.getElementById('indices-count-display');
+            if (countDisplay) {
+                countDisplay.innerText = indicesDebloquesSet.size + ' (-' + (data.penalite || 0).toFixed(2) + ' pt déduit)';
+            }
+
+            const scoreDetailsRow = document.getElementById('score-details-row');
+            if (scoreDetailsRow) scoreDetailsRow.style.display = 'block';
+
+            const statusTextElem = document.getElementById('prof-eval-status-text');
+            if (statusTextElem) {
+                statusTextElem.innerHTML = "<span style='color: #15803d; font-weight: bold;'>✅ Dossier validé et certifié conforme</span>";
+            }
+
+            // 3. Badges des compétences Éduscol
+            if (data.competences) {
+                mettreAJourBadgesCompetences(data.competences);
+            }
+
+            // 4. Application intégrale de la correction (badges, réponses attendues, verrous)
+            if (data.details_questions) {
+                appliquerCorrectionDossier(data.details_questions);
+            }
+
+            // 5. Téléchargement automatique du PDF de la copie
+            exporterDossierPDF();
+        }
+
+        function determinerClassePalier(palierStr) {
+            const str = (palierStr || '').toUpperCase();
+            if (str.includes('TRÈS BONNE') || str.includes('TRES BONNE')) return 'eval-vert-fonce';
+            if (str.includes('SATISFAISANTE')) return 'eval-vert-clair';
+            if (str.includes('FRAGILE')) return 'eval-jaune';
+            return 'eval-rouge';
+        }
+
+        function palierDepuisNote(note) {
+            if (note >= 17.0) return "TRÈS BONNE MAÎTRISE";
+            if (note > 11.0) return "MAÎTRISE SATISFAISANTE";
+            if (note > 4.0) return "MAÎTRISE FRAGILE";
+            return "MAÎTRISE INSUFFISANTE";
+        }
+
+        function mettreAJourBadgesCompetences(competencesObj) {
+            if (!competencesObj) return;
+            for (const [code, palier] of Object.entries(competencesObj)) {
+                const badgeElem = document.getElementById('eval-' + code.toLowerCase() + '-palier');
+                if (badgeElem) {
+                    badgeElem.className = 'eval-badge ' + determinerClassePalier(palier);
+                    badgeElem.innerText = String(palier).toUpperCase();
+                }
+            }
+        }
+
+        function calculerCompetencesLocales(noteFinale) {
+            const c1Checked = document.getElementById('check-c2-classeur')?.checked;
+            const c2Checked = document.getElementById('check-c2-stylo')?.checked;
+            const countC2 = (c1Checked ? 1 : 0) + (c2Checked ? 1 : 0);
+            const palierC2 = countC2 === 2 ? 'TRÈS BONNE MAÎTRISE' : (countC2 === 1 ? 'MAÎTRISE FRAGILE' : 'MAÎTRISE INSUFFISANTE');
+            const palierNote = palierDepuisNote(noteFinale);
+
+            const compObj = {};
+            if (Array.isArray(CONFIG_TD.competences)) {
+                CONFIG_TD.competences.forEach(c => {
+                    if (c.code === 'C2' || c.mode === 'cases_prof') {
+                        compObj[c.code] = palierC2;
+                    } else {
+                        compObj[c.code] = palierNote;
+                    }
+                });
+            } else {
+                compObj['C1'] = palierNote;
+                compObj['C2'] = palierC2;
+            }
+            return { compObj, palierC2, palierNote };
+        }
+
+        // Secours algorithmique local direct
+        function evaluerLocalementSecours(reponses) {
+            const evalResult = evaluerReponsesQuestions(reponses);
+            const scoreBrut = evalResult.scoreBrut;
+            const denom = evalResult.totalBrut;
+            const note20Brute = evalResult.note20;
+            const nbPayants = Math.max(0, indicesDebloquesSet.size - CONFIG_TD.indicesGratuits);
+            const penalite = nbPayants * CONFIG_TD.penaliteParIndice;
+            const noteFinale = Math.max(0.0, Math.min(20.0, Math.round((note20Brute - penalite) * 10) / 10));
+
+            const { compObj, palierNote } = calculerCompetencesLocales(noteFinale);
+
+            const dataFinal = {
+                note: noteFinale,
+                score_brut: scoreBrut,
+                total_brut: denom,
+                penalite: penalite,
+                appreciation: "Évaluation locale de secours effectuée. " + palierNote,
+                competences: compObj,
+                details_questions: evalResult.details
+            };
+
+            traiterResultatFinal(dataFinal);
+        }
+
+        /* =========================================================================
+           14. INITIALISATION AU DOMCONTENTLOADED
+           ========================================================================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. Initialisation des textes d'en-tête depuis CONFIG_TD
+            const titleDoc = document.getElementById('dock-title-label');
+            if (titleDoc && CONFIG_TD.titreCourtDock) titleDoc.innerText = CONFIG_TD.titreCourtDock;
+
+            const titreOffP1 = document.getElementById('header-titre-officiel');
+            if (titreOffP1 && CONFIG_TD.titreOfficiel) titreOffP1.innerText = CONFIG_TD.titreOfficiel;
+
+            const titreOffP2 = document.getElementById('header-titre-officiel-p2');
+            if (titreOffP2 && CONFIG_TD.titreOfficiel) titreOffP2.innerText = CONFIG_TD.titreOfficiel;
+
+            const titreOffP3 = document.getElementById('header-titre-officiel-p3');
+            if (titreOffP3 && CONFIG_TD.titreOfficiel) titreOffP3.innerText = CONFIG_TD.titreOfficiel;
+
+            const filiereLabel = document.getElementById('header-filiere-label');
+            if (filiereLabel && CONFIG_TD.filiere) filiereLabel.innerText = CONFIG_TD.filiere;
+
+            // 2. Génération dynamique des lignes de compétences en Page 3
+            const tbodyComp = document.querySelector('#table-bilan-competences tbody');
+            if (tbodyComp && Array.isArray(CONFIG_TD.competences)) {
+                tbodyComp.innerHTML = '';
+                CONFIG_TD.competences.forEach(comp => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="text-align: center; font-weight: 800; color: var(--primary); font-size: 13.5px;">${comp.code}</td>
+                        <td style="font-size: 13px;">
+                            <strong>${comp.libelle}</strong>
+                            <span style="color: #475569; display: block; font-size: 12px; margin-top: 1px;">${comp.descriptionBilan || ''}</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span id="eval-${comp.code.toLowerCase()}-palier" class="eval-badge eval-pending">EN ATTENTE</span>
+                        </td>
+                        <td id="eval-${comp.code.toLowerCase()}-pts" style="text-align: center; font-weight: 700; color: #475569; font-size: 12.5px;">--</td>
+                    `;
+                    tbodyComp.appendChild(tr);
+                });
+            }
+
+            // 3. Remplacement des images locales par les images Base64 si disponibles
+            if (window.TD_IMAGES_DATA) {
+                document.querySelectorAll('img').forEach(img => {
+                    const src = img.getAttribute('src');
+                    if (src) {
+                        const fname = src.split('/').pop().split('?')[0];
+                        if (window.TD_IMAGES_DATA[fname]) {
+                            img.src = window.TD_IMAGES_DATA[fname];
+                        }
+                    }
+                });
+            }
+
+            // 4. Zoom molette
+            const modalZoom = document.getElementById('zoom-modal');
+            if (modalZoom) {
+                modalZoom.addEventListener('wheel', (e) => {
+                    const delta = e.deltaY < 0 ? 0.15 : -0.15;
+                    zoomModifier(delta);
+                    e.preventDefault();
+                }, { passive: false });
+            }
+
+            // 5. Initialisation affichage identité et progression
+            mettreAJourIdentite();
+            onUserAnswerChange(null);
+            mettreAJourC2();
+        });
+    </script>
+</body>
+</html>
